@@ -3,10 +3,18 @@ module.exports = {
   env: {
     node: true
   },
-  extends: ["plugin:vue/essential", "@vue/prettier", "@vue/typescript"],
+  plugins: ["es-beautifier"],
+  extends: [
+    "plugin:vue/essential",
+    "plugin:es-beautifier/standard",
+    "@vue/typescript"
+  ],
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off"
+    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+    "comma-dangle": ["error", "never"],
+    "linebreak-style": "off",
+    "arrow-parens": "off"
   },
   parserOptions: {
     parser: "@typescript-eslint/parser"
