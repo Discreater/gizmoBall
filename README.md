@@ -6,7 +6,8 @@
 {
     "editor.formatOnSave": true,
     "vetur.format.defaultFormatter.html": "js-beautify-html",
-    "vetur.format.defaultFormatter.ts": "vscode-typescript"
+    "vetur.format.defaultFormatter.ts": "vscode-typescript",
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }
 ```
 
@@ -19,12 +20,12 @@ yarn install
 
 ### Compiles and hot-reloads for development
 ```
-yarn electron:serve
+yarn serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn electron:build
+yarn build
 ```
 
 ### Lints and fixes files
