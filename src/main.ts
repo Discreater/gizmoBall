@@ -4,6 +4,9 @@ import "./registerServiceWorker";
 import router from "./router";
 import store from "./store";
 
+
+import { Titlebar, Color, RGBA } from "custom-electron-titlebar";
+
 Vue.config.productionTip = false;
 
 new Vue({
@@ -11,3 +14,8 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount("#app");
+
+new Titlebar({
+  backgroundColor: new Color(new RGBA(60, 60, 60))
+})
+

@@ -5,6 +5,9 @@ import {
   createProtocol,
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+
+import Util from './common/ts/util/back'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -24,7 +27,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    frame: false
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -72,6 +76,8 @@ app.on('ready', async () => {
     }
   }
   createWindow()
+
+  Util.judgeTheme();
 })
 
 // Exit cleanly on request from parent process in development mode.
@@ -88,3 +94,4 @@ if (isDevelopment) {
     })
   }
 }
+
