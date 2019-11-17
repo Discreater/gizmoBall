@@ -14,7 +14,8 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "comma-dangle": ["error", "never"],
     "linebreak-style": "off",
-    "arrow-parens": "off"
+    "arrow-parens": "off",
+    "padded-blocks":  "off"
   },
   parserOptions: {
     parser: "@typescript-eslint/parser"

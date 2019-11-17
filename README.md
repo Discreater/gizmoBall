@@ -3,11 +3,29 @@
 ## `.vscode/settings.json`
 
 ```
-{
-    "editor.formatOnSave": true,
-    "vetur.format.defaultFormatter.html": "js-beautify-html",
-    "vetur.format.defaultFormatter.ts": "vscode-typescript",
-    "typescript.tsdk": "node_modules\\typescript\\lib"
+{    
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "editor.tabSize": 2,
+    "eslint.validate": [
+        {
+            "language": "vue",
+            "autoFix": true
+        },
+        {
+            "language": "javascript",
+            "autoFix": true
+        },
+        {
+            "language": "javascriptreact",
+            "autoFix": true
+        },
+        {
+            "language": "typescript",
+            "autoFix": true
+        }
+    ],
+    "eslint.autoFixOnSave": true,
+    "vetur.validation.template": true
 }
 ```
 
@@ -41,25 +59,23 @@ yarn lint
 
 [TypeScript 3.7 新特性](https://devblogs.microsoft.com/typescript/announcing-typescript-3-7-beta/)
 
-[TypeScript 模块申明文件](https://microsoft.github.io/TypeSearch/)
+[TypeScript 查找第三方JS库声明文件](https://microsoft.github.io/TypeSearch/) （当库作者未提供TS声明文件时再查找）
 
 [electron 文档](https://electronjs.org/docs)
-
-[SCSS 教程](https://www.sass.hk/docs/) (推荐谷歌)
 
 词穷了？[变量命名](https://unbug.github.io/codelf/)
 
 # VSCode 推荐扩展
+
+    ✨ESlint
+
+    ✨Vetur
 
     Auto Close Tag
 
     Auto Rename Tag
 
     Bracket Pair Colorizer
-
-    ESlint
-
-    ✨Vetur
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).

@@ -5,9 +5,14 @@ import router from "./router";
 import store from "./store";
 
 
-import { Titlebar, Color, RGBA } from "custom-electron-titlebar";
+import TSViews from "./views/TSViews"
+import { remote } from "electron";
+
 
 Vue.config.productionTip = false;
+
+
+init()
 
 new Vue({
   router,
@@ -15,7 +20,9 @@ new Vue({
   render: h => h(App)
 }).$mount("#app");
 
-new Titlebar({
-  backgroundColor: new Color(new RGBA(60, 60, 60))
-})
 
+function init() {
+  let useLightTheme: boolean = remote.getGlobal('sharedObject').useLightTheme
+  store.commit('changeTheme', useLightTheme)
+  TSViews.setTitleBar();
+}
