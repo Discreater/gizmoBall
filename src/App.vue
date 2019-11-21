@@ -1,12 +1,34 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
+  <div id="app" ref="app">
+    <Home></Home>
   </div>
 </template>
+
+<script lang="ts">
+import { Component, Prop, Vue } from "vue-property-decorator";
+import Home from '@/views/Home.vue'
+
+@Component({
+  components: {
+    Home
+  }
+})
+export default class HelloWorld extends Vue {
+
+  $refs!: {
+    app: HTMLElement
+  }
+
+  mounted() {
+    this.setAppSize();
+  }
+
+  private setAppSize() {
+    this.$refs.app.style.height = `${window.innerHeight - 30}px`;
+    this.$refs.app.style.width = `${window.innerWidth}px`;
+  }
+}
+</script>
 
 <style lang="stylus">
 body {
@@ -34,4 +56,10 @@ body {
     }
   }
 }
+
+.caption{
+  background-color var(--color-caption-bg)
+  color var(--color-caption-text)
+}
+
 </style>

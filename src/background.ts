@@ -23,8 +23,13 @@ protocol.registerSchemesAsPrivileged([{
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 1080,
-    height: 760,
+    width: 1024,
+    height: 768,
+    minWidth: 1024,
+    minHeight: 768,
+    maxWidth: 1024,
+    maxHeight: 768,
+    maximizable: false,
     webPreferences: {
       nodeIntegration: true
     },
@@ -44,6 +49,7 @@ function createWindow() {
   win.on('closed', () => {
     win = null
   })
+
 }
 
 // Quit when all windows are closed.

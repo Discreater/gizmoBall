@@ -1,5 +1,5 @@
-import { Titlebar, Color, RGBA } from "../common/ts/titleBar";
-// import { Titlebar, Color, RGBA } from "custom-electron-titlebar";
+// import { Titlebar, Color, RGBA } from "../common/ts/titleBar";
+import { Titlebar, Color, RGBA } from "custom-electron-titlebar";
 import store from "@/store/index"
 import {
   remote,
@@ -24,7 +24,8 @@ class TSViews {
     this.useLightTheme = store.state.useLightTheme
     this.titlebar = new Titlebar({
       backgroundColor: this.useLightTheme ? this.light : this.dark,
-      icon: "favicon.ico"
+      icon: "favicon.ico",
+      maximizable: false
     })
     // console.log('use Light Theme? ' + this.useLightTheme);
 

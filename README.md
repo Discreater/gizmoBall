@@ -61,6 +61,8 @@ yarn lint
 
 [TypeScript 查找第三方JS库声明文件](https://microsoft.github.io/TypeSearch/) （当库作者未提供TS声明文件时再查找）
 
+[Vue-class 单文件组件示例](https://github.com/vuejs/vue-class-component/blob/master/example/src/App.vue)
+
 [electron 文档](https://electronjs.org/docs)
 
 词穷了？[变量命名](https://unbug.github.io/codelf/)

@@ -132,7 +132,7 @@ export class Titlebar extends Themebar {
 
 	private isInactive!: boolean;
 
-	private currentWindow: BrowserWindow;
+	private currentWindow!: BrowserWindow;
 	private _options: TitlebarOptions;
 	private menubar!: Menubar;
 
@@ -156,31 +156,46 @@ export class Titlebar extends Themebar {
 	}
 
 	private registerListeners() {
-	  this.currentWindow.on(EventType.FOCUS, () => {
+	  const focusFunc = () => {
 	    this.onDidChangeWindowFocus(true);
 	    this.onFocus();
-	  });
+	  };
+	  this.currentWindow.on(EventType.FOCUS, focusFunc);
 
-	  this.currentWindow.on(EventType.BLUR, () => {
+	  const blurFunc = () => {
 	    this.onDidChangeWindowFocus(false);
 	    this.onBlur();
-	  });
+	  }
+	  this.currentWindow.on(EventType.BLUR, blurFunc);
 
-	  this.currentWindow.on(EventType.MAXIMIZE, () => {
+	  const maximizeFunc = () => {
 	    this.onDidChangeMaximized(true);
-	  });
+	  }
+	  this.currentWindow.on(EventType.MAXIMIZE, maximizeFunc);
 
-	  this.currentWindow.on(EventType.UNMAXIMIZE, () => {
+	  const unmaximizeFunc = () => {
 	    this.onDidChangeMaximized(false);
-	  });
+	  };
+	  this.currentWindow.on(EventType.UNMAXIMIZE, unmaximizeFunc);
 
-	  this.currentWindow.on(EventType.ENTER_FULLSCREEN, () => {
+	  const EFFunc = () => {
 	    this.onDidChangeFullscreen(true);
-	  });
+	  };
+	  this.currentWindow.on(EventType.ENTER_FULLSCREEN, EFFunc);
 
-	  this.currentWindow.on(EventType.LEAVE_FULLSCREEN, () => {
+	  const LFFunc = () => {
 	    this.onDidChangeFullscreen(false);
-	  });
+	  };
+	  this.currentWindow.on(EventType.LEAVE_FULLSCREEN, LFFunc);
+
+	  window.addEventListener('beforeunload', () => {
+	    this.currentWindow.removeListener(EventType.FOCUS, focusFunc);
+	    this.currentWindow.removeListener(EventType.BLUR, blurFunc);
+	    this.currentWindow.removeListener(EventType.MAXIMIZE, maximizeFunc);
+	    this.currentWindow.removeListener(EventType.UNMAXIMIZE, unmaximizeFunc);
+	    this.currentWindow.removeListener(EventType.ENTER_FULLSCREEN, EFFunc);
+	    this.currentWindow.removeListener(EventType.LEAVE_FULLSCREEN, LFFunc);
+	  })
 	}
 
 	private createTitlebar() {
