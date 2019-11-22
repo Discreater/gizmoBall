@@ -1,88 +1,199 @@
 export class Vector2D {
   constructor(public x: number, public y: number) {}
+
+  /**
+   * 相等于v
+   */
   public equals(v:Vector2D):boolean {
     return Vector2D.equals(this, v);
   }
+
+  /**
+   * 返回自身的复制
+   */
   public clone():Vector2D {
     return Vector2D.copy(this);
   }
+
+  /**
+   * 自身加上向量v,返回自身
+   */
   public add(v: Vector2D):Vector2D {
     this.x += v.x;
     this.y += v.y;
     return this;
   }
+
+  /**
+   * 重新赋值为v/拷贝v的值,返回自身
+   */
   public as(v:Vector2D):Vector2D {
     this.x = v.x;
     this.y = v.y;
     return this;
   }
+
+  /**
+   * 自乘实数n,返回自身
+   */
   public mult(n: number):Vector2D {
     this.x *= n;
     this.y *= n;
     return this;
   }
+
+  /**
+   * 与v的数量积/点积
+   */
   public dot(v:Vector2D):number {
     return Vector2D.dot(this, v);
   }
+
+  /**
+   * 模长
+   */
   get radius():number {
     return Vector2D.radius(this);
   }
 
+
+  /**
+   * 法向量,新向量,在向量右侧:原↖法↗
+   */
   get normalVector():Vector2D {
     return Vector2D.normalVector(this);
   }
+
+  /**
+   * 与自身同向的单位向量,返回新向量
+   */
   get unitVector():Vector2D {
     return Vector2D.unitization(this);
   }
+
+  /**
+   * 在v上的投影值
+   */
   public projection(v:Vector2D):number {
     return Vector2D.projection(this, v);
   }
 
+  /**
+   * 在轴axis上的分量,返回新向量
+   */
+  public component(axis:Vector2D):Vector2D {
+    return Vector2D.vectorProjection(this, axis);
+  }
+
+  /**
+   * 自身旋转一个角度angle,返回自身
+   */
   public vectorRotate(angle:Angle):Vector2D {
     return this.as(Vector2D.vectorRotate(this, angle));
   }
+
+  /**
+   * 自身视作点,让自身并绕中心点center旋转一个角度angle,返回自身
+   */
   public pointRotate(center:Vector2D, angle:Angle):Vector2D {
     return this.as(Vector2D.pointRotate(this, center, angle));
   }
 
+  /**
+   * 向量加法
+   */
   public static add(v1:Vector2D, v2:Vector2D):Vector2D {
     return new Vector2D(v1.x + v2.x, v1.y + v2.y);
   }
+
+  /**
+   * 向量减法
+   */
   public static difference(v1:Vector2D, v2:Vector2D):Vector2D {
     return new Vector2D(v1.x - v2.x, v1.y - v2.y);
   }
 
+  /**
+   * 向量数乘计算
+   */
   public static mult(v:Vector2D, n:number):Vector2D {
     return new Vector2D(v.x * n, v.y * n);
   }
+
+  /**
+   * 向量点积计算
+   */
   public static dot(v1:Vector2D, v2:Vector2D):number {
     return v1.x * v2.x + v1.y * v2.y;
   }
+
+  /**
+   * 向量模长计算
+   */
   public static radius(v:Vector2D):number {
     return Math.sqrt(Vector2D.dot(v, v));
   }
+
+  /**
+   * 向量单位化
+   */
   public static unitization(v:Vector2D):Vector2D {
     if (v.equals(Vector2D.ZERO)) {
       throw new Error("cannot get unitization of zero vector");
     }
     return v.clone().mult(1 / v.radius);
   }
+
+  /**
+   * 向量投影计算
+   */
   public static projection(v1:Vector2D, v2:Vector2D):number {
     return Vector2D.dot(v1, v2) / v2.radius;
   }
+
+  /**
+   * 向量投影分量计算
+   */
+  public static vectorProjection(v:Vector2D, axis:Vector2D):Vector2D {
+    return axis.unitVector.mult(v.projection(axis))
+  }
+
+  /**
+   * 向量夹角计算
+   */
   public static angle(v1:Vector2D, v2:Vector2D):number {
     return Math.acos(Vector2D.dot(v1, v2) / (v1.radius * v2.radius));
   }
+
+  /**
+   * 拷贝向量
+   */
   public static copy(v:Vector2D):Vector2D {
     return new Vector2D(v.x, v.y);
   }
+
+  /**
+   * 零向量
+   */
   public static readonly ZERO:Vector2D = new Vector2D(0, 0);
+
+  /**
+   * 向量相等判定
+   */
   public static equals(v1:Vector2D, v2:Vector2D):boolean {
     return v1.x === v2.x && v1.y === v2.y;
   }
+
+  /**
+   * 法向量计算,在向量右侧:原↖法↗
+   */
   public static normalVector(v:Vector2D):Vector2D {
     return new Vector2D(v.y, -v.x);
   }
+
+  /**
+   * 向量旋转计算
+   */
   public static vectorRotate(v:Vector2D, angle:Angle):Vector2D {
     let a:number = angle.value;
     let cos:number = Math.cos(a),
@@ -96,15 +207,27 @@ export class Vector2D {
         return new Vector2D(v.x * cos - v.y * sin, v.y * cos + v.x * sin);
     }
   }
+
+  /**
+   * 点绕点旋转计算
+   */
   public static pointRotate(p:Vector2D, center:Vector2D, angle:Angle):Vector2D {
     return Vector2D.difference(p, center).vectorRotate(angle).add(center);
   }
 }
 
 export class Line {
+
+  /**
+   * 直线方向向量
+   */
   get directionVector():Vector2D {
     return Vector2D.difference(this.p1, this.p2);
   }
+
+  /**
+   * 直线法向量,在方向向量右侧:原↖法↗
+   */
   get normalVector():Vector2D {
     return this.directionVector.normalVector;
   }
@@ -113,11 +236,19 @@ export class Line {
       throw new Error("Points cannot be the same!");
     }
   }
+
+  /**
+   * 点到直线距离
+   */
   public distance(point:Vector2D):number {
     let v1:Vector2D = Vector2D.difference(point, this.p1);
     let n:Vector2D = this.normalVector;
     return Math.abs(v1.projection(n));
   }
+
+  /**
+   * 返回自身复制
+   */
   public clone():Line {
     return new Line(this.p1.clone(), this.p2.clone());
   }

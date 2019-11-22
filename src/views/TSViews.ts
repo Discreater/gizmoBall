@@ -21,7 +21,7 @@ class TSViews {
    * 创建标题栏，包括菜单栏
    */
   public static setTitleBar() {
-    this.useLightTheme = store.state.useLightTheme
+    this.useLightTheme = store.state.module1.useLightTheme
     this.titlebar = new Titlebar({
       backgroundColor: this.useLightTheme ? this.light : this.dark,
       icon: "favicon.ico",
@@ -109,7 +109,7 @@ class TSViews {
               type: "radio",
               click: (menuItem) => {
                 menuItem.checked = true
-                store.commit('changeTheme', true)
+                store.commit.changeTheme(true)
                 this.titlebar.updateMenu(customMenu)
               }
             },
@@ -118,7 +118,7 @@ class TSViews {
               type: "radio",
               click: (menuItem) => {
                 menuItem.checked = true
-                store.commit('changeTheme', false)
+                store.commit.changeTheme(false)
                 this.titlebar.updateMenu(customMenu)
               }
             },
@@ -129,7 +129,7 @@ class TSViews {
               enabled: process.platform === 'win32',
               click: (menuItem) => {
                 menuItem.checked = true
-                store.commit('changeTheme', remote.getGlobal('sharedObject').useLightTheme)
+                store.commit.changeTheme(remote.getGlobal('sharedObject').useLightTheme)
                 this.titlebar.updateMenu(customMenu)
               },
               checked: true

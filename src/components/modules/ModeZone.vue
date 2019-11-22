@@ -25,18 +25,20 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-
+import store from "@/store/index"
 @Component
 export default class ModeZone extends Vue {
 
-  currentMode: 'LAYOUT' | 'PLAY' = 'LAYOUT';
+  get currentMode() {
+    return store.state.module1.currentMode;
+  }
 
   private changeToLayoutMode() {
-    this.currentMode = 'LAYOUT'
+    store.commit.changeMode('LAYOUT');
   }
 
   private changeToPlayMode() {
-    this.currentMode = 'PLAY'
+    store.commit.changeMode('PLAY');
   }
 }
 </script>

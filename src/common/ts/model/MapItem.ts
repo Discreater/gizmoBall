@@ -22,6 +22,7 @@ export interface IZoomable {
 
 export interface ITransmittable {
   position: Vector2D;
+  center: Vector2D;
   translate(point:Vector2D):ITransmittable;
 }
 
@@ -84,6 +85,12 @@ export abstract class Polygon implements ICollisible, IZoomable, IRotatable, ITr
   public set position(position:Vector2D) {
     this.translate(position);
   }
+  public get center():Vector2D {
+    let vs:Vector2D[] = this.vertexes;
+    let v1:Vector2D = vs[0],
+      v2:Vector2D = vs[2];
+    return v1.add(v2).mult(0.5);
+  }
   public translate(point:Vector2D):ITransmittable {
     this._vertexes.forEach((value) => value.add(Vector2D.difference(point, this._position)));
     this._position = point.clone();
@@ -107,15 +114,47 @@ export abstract class Polygon implements ICollisible, IZoomable, IRotatable, ITr
     this._edges = this._vertexes.map((item, index, array) => new Line(item, array[(index + 1) % array.length]));
   }
   public crashDetect(crashable: ICollisible):boolean {
+    // todo
     return false;
   }
   public crashHandle(crashable: ICollisible):void {
-    // todo
+    if (crashable instanceof Ball) {
+      let closestLine:Line = this._edges[0];
+      let ballPos = crashable.massPoint.p;
+      let closestDistance:number = this._edges[0].distance(ballPos);
+      this._edges.forEach((value) => {
+        let thisDistance = value.distance(ballPos);
+        if (closestDistance > thisDistance) {
+          closestDistance = thisDistance;
+          closestLine = value;
+        }
+      })
+      crashable.massPoint.addVelocity(crashable.massPoint.v.component(closestLine.normalVector).mult(-2));
+    }
   }
 }
 
 export class Square extends Polygon {
+  public static readonly vertical:Vector2D = new Vector2D(0, MapItem.gridScale);
+  public static readonly horizontal:Vector2D = new Vector2D(MapItem.gridScale, 0);
+  constructor(position:Vector2D) {
+    super([
+      position.clone(),
+      position.clone().add(Square.vertical),
+      position.clone().add(Square.horizontal).add(Square.vertical),
+      position.clone().add(Square.horizontal)
+    ],
+    position);
+  }
 }
 
 export class Triangle extends Polygon {
+  constructor(position:Vector2D) {
+    super([
+      position.clone(),
+      position.clone().add(Square.vertical),
+      position.clone().add(Square.horizontal).add(Square.vertical)
+    ],
+    position);
+  }
 }

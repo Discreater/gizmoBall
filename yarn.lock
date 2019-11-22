@@ -3360,6 +3360,11 @@ dir-glob@^2.0.0, dir-glob@^2.2.2:
   dependencies:
     path-type "^3.0.0"
 
+direct-vuex@^0.7.5:
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/direct-vuex/-/direct-vuex-0.7.5.tgz#cdb7aaf69137e40121de6b00f7a7997f18db9bce"
+  integrity sha512-CBxFRd3PWXDoCdbbeTlQ0FNPdSSiGGqEFWRUcpqjLkVAevCfPAz4EmpXUqvhTIixESZHTwk0usd6vtERdX8qtA==
+
 dmg-builder@21.2.0:
   version "21.2.0"
   resolved "https://registry.yarnpkg.com/dmg-builder/-/dmg-builder-21.2.0.tgz#a9c883557cacb9abdb66c7133b30fe921c1a3ba7"

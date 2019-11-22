@@ -1,5 +1,5 @@
 <template>
-  <div class="tool-zone">
+  <div class="tool-zone" :style="'pointer-events: ' + (currentMode=='LAYOUT' ? 'auto' : 'none')">
     <table class="tool-table" width="100%">
       <caption class="caption">工具栏</caption>
       <tr class="two-tool">
@@ -24,10 +24,14 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import store from "@/store/index"
 
 @Component
 export default class ToolZone extends Vue {
-  length: Number = 50;
+  get currentMode() {
+    return store.state.module1.currentMode;
+  }
+  length: number = 50;
 }
 </script>
 

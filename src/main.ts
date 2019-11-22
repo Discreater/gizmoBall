@@ -13,13 +13,13 @@ init()
 
 new Vue({
   router,
-  store,
+  store: store.original,
   render: h => h(App)
 }).$mount("#app")
 
 
 function init() {
   let useLightTheme: boolean = remote.getGlobal('sharedObject').useLightTheme
-  store.commit('changeTheme', useLightTheme)
+  store.commit.changeTheme(useLightTheme)
   TSViews.setTitleBar()
 }
