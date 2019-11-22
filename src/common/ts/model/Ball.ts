@@ -1,15 +1,13 @@
-import { Position, Velocity } from './Physical';
+import { MassPoint } from "./Physical";
 
 export class Ball {
-  public position:Position;
+  public massPoint:MassPoint;
   public static imageUrl:string = "img/item/ball.png";
   get imgURL():string {
     return Ball.imageUrl;
   }
   constructor() {
-    this.position = { x: 0, y: 0 }
-    this.velocity = { vx: 0, vy: 0 }
+    this.massPoint = new MassPoint();
   }
-  public velocity:Velocity;
 }
 

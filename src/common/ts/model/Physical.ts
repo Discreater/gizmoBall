@@ -1,63 +1,51 @@
-export interface Position {
-  x:number;
-  y:number;
-}
-
-export interface Velocity {
-  vx: number;
-  vy: number;
-}
-
-export interface Acceleration {
-  ax: number;
-  ay: number;
-}
+import { Vector2D } from "./Vector";
 
 export class Physical {
-  public static readonly gravity:Acceleration = { ax: 0, ay: 9.8 };
+  public static readonly gravity:Vector2D = new Vector2D(0, 9.8);
   public static readonly tick:number = 0.01;
 }
 
-class MassPoint {
-  private _p: Position;
-  private _v: Velocity;
-  private _a: Acceleration;
+export class MassPoint {
+  private _p: Vector2D;
+  private _v: Vector2D;
+  private _a: Vector2D;
   constructor() {
-    this._a = { ax: 0, ay: 0 };
-    this._v = { vx: 0, vy: 0 };
-    this._p = { x: 0, y: 0 };
+    this._a = new Vector2D(0, 0);
+    this._v = new Vector2D(0, 0);
+    this._p = new Vector2D(0, 0);
   }
-  get p():Position {
-    return { x: this._p.x, y: this._p.y };
+  get p():Vector2D {
+    return Vector2D.copy(this._p);
   }
-  get v():Velocity {
-    return { vx: this._v.vx, vy: this._v.vy };
+  get v():Vector2D {
+    return Vector2D.copy(this._v);
   }
-  get a():Acceleration {
-    return { ax: this._a.ax, ay: this._a.ay };
+  get a():Vector2D {
+    return Vector2D.copy(this._a);
   }
   public tick():void {
     this.changeVelocity();
     this.move();
   }
 
-  public translate(p: Position) {
+  public translate(p: Vector2D):MassPoint {
     this._p = p;
+    return this;
   }
-  public move(t: number = Physical.tick) {
-    this._p.x += this._v.vx * t;
-    this._p.y += this._v.vy * t;
+  public move(t: number = Physical.tick):MassPoint {
+    this._p.add(Vector2D.mult(this._v, t));
+    return this;
   }
-  public changeVelocity(t: number = Physical.tick) {
-    this._v.vx += this._a.ax * t;
-    this._v.vy += this._a.ay * t;
+  public changeVelocity(t: number = Physical.tick):MassPoint {
+    this._v.add(Vector2D.mult(this._a, t));
+    return this;
   }
-  public addVelocity(v: Velocity) {
-    this._v.vx += v.vx;
-    this._v.vy += v.vy;
+  public addVelocity(v: Vector2D):MassPoint {
+    this._v.add(v);
+    return this;
   }
-  public addAcceleration(a: Acceleration) {
-    this._a.ax += a.ax;
-    this._a.ay += a.ay;
+  public addAcceleration(a: Vector2D):MassPoint {
+    this._a.add(a);
+    return this;
   }
 }
