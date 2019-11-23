@@ -4,18 +4,18 @@
       <caption class="caption">工具栏</caption>
       <tr class="two-tool">
         <td >
-          <img class="tool" src="img/tool/rotate.png" :height="length" :width="length"/>
+          <img class="tool" src="img/tool/rotate.png" @click="rotate" :height="length" :width="length"/>
         </td>
         <td >
-          <img class="tool" src="img/tool/remove.png" :height="length" :width="length"/>
+          <img class="tool" src="img/tool/remove.png" @click="remove" :height="length" :width="length"/>
         </td>
       </tr>
       <tr>
         <td >
-          <img class="tool" src="img/tool/zoom-in.png" :height="length" :width="length"/>
+          <img class="tool" src="img/tool/zoom-in.png" @click="zoomin" :height="length" :width="length"/>
         </td>
         <td>
-          <img class="tool" src="img/tool/zoom-out.png" :height="length" :width="length"/>
+          <img class="tool" src="img/tool/zoom-out.png" @click="zoomout" :height="length" :width="length"/>
         </td>
       </tr>
     </table>
@@ -32,6 +32,10 @@ export default class ToolZone extends Vue {
     return store.state.module1.currentMode;
   }
   length: number = 50;
+  rotate() {}
+  remove() {}
+  zoomin() {}
+  zoomout() {}
 }
 </script>
 

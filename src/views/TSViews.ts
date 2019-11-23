@@ -7,7 +7,7 @@ import {
   MenuItem,
   MenuItemConstructorOptions
 } from 'electron';
-
+import Controller from "@/common/ts/Controller"
 
 class TSViews {
 
@@ -70,7 +70,11 @@ class TSViews {
         },
         {
           label: "另存为",
-          accelerator: "Ctrl+Shift+S"
+          accelerator: "Ctrl+Shift+S",
+          click: () => {
+            const controller = Controller.getInstance();
+            controller.saveAs();
+          }
         },
         {
           type: "separator"

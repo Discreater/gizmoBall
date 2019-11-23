@@ -38,7 +38,7 @@ export default class ItemZone extends Vue {
 
   @Watch('currentItem')
   onCurrentItemChanged(val: ItemType, oldVal: ItemType) {
-    store.state.module1.currentItem = Gizmo.getViewItemByType(oldVal);
+    store.commit.changeToolZoneCurrentItem(Gizmo.getViewItemByType(val))
   }
 
   readonly itemss: ViewItem[][] = Gizmo.itemss

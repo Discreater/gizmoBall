@@ -2,7 +2,7 @@ export class Vector2D {
   constructor(public x: number, public y: number) {}
 
   /**
-   * 相等于v
+   * 返回自身相等于v的判断
    */
   public equals(v:Vector2D):boolean {
     return Vector2D.equals(this, v);
@@ -43,14 +43,14 @@ export class Vector2D {
   }
 
   /**
-   * 与v的数量积/点积
+   * 自身与v的数量积/点积
    */
   public dot(v:Vector2D):number {
     return Vector2D.dot(this, v);
   }
 
   /**
-   * 模长
+   * 自身模长
    */
   get radius():number {
     return Vector2D.radius(this);
@@ -58,7 +58,7 @@ export class Vector2D {
 
 
   /**
-   * 法向量,新向量,在向量右侧:原↖法↗
+   * 自身法向量,返回新向量,在向量右侧:原↖法↗
    */
   get normalVector():Vector2D {
     return Vector2D.normalVector(this);
@@ -72,14 +72,14 @@ export class Vector2D {
   }
 
   /**
-   * 在v上的投影值
+   * 计算自身在v上的投影值
    */
   public projection(v:Vector2D):number {
     return Vector2D.projection(this, v);
   }
 
   /**
-   * 在轴axis上的分量,返回新向量
+   * 自身在轴axis上的分量,返回新向量
    */
   public component(axis:Vector2D):Vector2D {
     return Vector2D.vectorProjection(this, axis);
@@ -97,6 +97,14 @@ export class Vector2D {
    */
   public pointRotate(center:Vector2D, angle:Angle):Vector2D {
     return this.as(Vector2D.pointRotate(this, center, angle));
+  }
+
+  /**
+   * 自身在axis向量为法线的平面进行反射,返回自身
+   * @param axis 反射面法线
+   */
+  public reflet(axis:Vector2D):Vector2D {
+    return this.as(Vector2D.reflect(this, axis));
   }
 
   /**
@@ -155,7 +163,7 @@ export class Vector2D {
    * 向量投影分量计算
    */
   public static vectorProjection(v:Vector2D, axis:Vector2D):Vector2D {
-    return axis.unitVector.mult(v.projection(axis))
+    return axis.clone().mult(v.dot(axis) / axis.dot(axis));
   }
 
   /**
@@ -175,7 +183,9 @@ export class Vector2D {
   /**
    * 零向量
    */
-  public static readonly ZERO:Vector2D = new Vector2D(0, 0);
+  public static get ZERO():Vector2D {
+    return new Vector2D(0, 0);
+  }
 
   /**
    * 向量相等判定
@@ -213,6 +223,15 @@ export class Vector2D {
    */
   public static pointRotate(p:Vector2D, center:Vector2D, angle:Angle):Vector2D {
     return Vector2D.difference(p, center).vectorRotate(angle).add(center);
+  }
+
+  /**
+   * 向量反射
+   * @param v 入射向量
+   * @param axis 法线轴向量
+   */
+  public static reflect(v:Vector2D, axis:Vector2D):Vector2D {
+    return v.component(axis).mult(-2).add(v);
   }
 }
 

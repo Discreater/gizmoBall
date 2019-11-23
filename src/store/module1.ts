@@ -7,7 +7,8 @@ export interface Module1State {
   currentMode: 'LAYOUT' | 'PLAY',
   gridSize: number,
   draggingItem: ViewItem | null,
-  currentItem: ViewItem
+  toolZoneCurrentItem: ViewItem,
+  panelCurrentItem: ViewItem | null
 }
 
 export default {
@@ -16,7 +17,8 @@ export default {
     currentMode: 'LAYOUT',
     gridSize: 10,
     draggingItem: null,
-    currentItem: Gizmo.selectItem
+    toolZoneCurrentItem: Gizmo.selectItem,
+    panelCurrentItem: null
   } as Module1State,
   mutations: {
     changeTheme(state: Module1State, useLight: boolean) {
@@ -31,8 +33,11 @@ export default {
     changeDraggingItem(state: Module1State, draggingItem: ViewItem | null) {
       state.draggingItem = draggingItem;
     },
-    changeCurrentItem(state: Module1State, currentItem: ViewItem) {
-      state.currentItem = currentItem;
+    changeToolZoneCurrentItem(state: Module1State, toolZoneCurrentItem: ViewItem) {
+      state.toolZoneCurrentItem = toolZoneCurrentItem;
+    },
+    changePanelCurrentItem(state: Module1State, panelCurrentItem: ViewItem) {
+      state.panelCurrentItem = panelCurrentItem;
     }
   },
   actions: {},
