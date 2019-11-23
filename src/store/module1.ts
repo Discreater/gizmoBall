@@ -1,19 +1,22 @@
 import TSViews from "../views/TSViews"
-import { ViewItem } from '@/types/gizmo';
+import { ViewItem, Gizmo } from '@/types/gizmo';
 
 
 export interface Module1State {
   useLightTheme: boolean,
   currentMode: 'LAYOUT' | 'PLAY',
   gridSize: number,
-  currentItem: ViewItem | null
+  draggingItem: ViewItem | null,
+  currentItem: ViewItem
 }
 
 export default {
   state: {
     useLightTheme: true,
     currentMode: 'LAYOUT',
-    gridSize: 10
+    gridSize: 10,
+    draggingItem: null,
+    currentItem: Gizmo.selectItem
   } as Module1State,
   mutations: {
     changeTheme(state: Module1State, useLight: boolean) {
@@ -25,7 +28,10 @@ export default {
     changeMode(state: Module1State, currentMode: 'LAYOUT' | 'PLAY') {
       state.currentMode = currentMode;
     },
-    changeCurrentItem(state: Module1State, currentItem: ViewItem | null) {
+    changeDraggingItem(state: Module1State, draggingItem: ViewItem | null) {
+      state.draggingItem = draggingItem;
+    },
+    changeCurrentItem(state: Module1State, currentItem: ViewItem) {
       state.currentItem = currentItem;
     }
   },
