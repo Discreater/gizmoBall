@@ -1,4 +1,9 @@
-import { PolygonCollider, MapItem, ICollisible } from "./MapItem";
+import {
+  PolygonCollider,
+  MapItem,
+  ICollisible,
+  MapItemNames
+} from "./MapItem";
 import { Vector2D } from "../../util/Vector";
 import { PolygonMapItem } from './Polygon';
 
@@ -22,12 +27,16 @@ export class TriangleCollider extends PolygonCollider {
 }
 
 export class TriangleMapItem extends PolygonMapItem {
+  public get name():MapItemNames {
+    return TriangleMapItem.Name;
+  }
   public get center():Vector2D {
     return this.collider.center;
   }
   get imgURL(): string {
     return TriangleMapItem.imageUrl;
   }
+  public static readonly Name:MapItemNames = "triangle";
   public static readonly imageUrl:string = "img/item/ball.png";
   constructor(x:number, y:number) {
     super(new TriangleCollider(new Vector2D(x, y)));

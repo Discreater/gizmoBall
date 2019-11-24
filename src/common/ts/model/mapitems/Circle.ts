@@ -1,4 +1,9 @@
-import { ICollisible, PolygonCollider, MapItem } from "./MapItem";
+import {
+  ICollisible,
+  PolygonCollider,
+  MapItem,
+  MapItemNames
+} from "./MapItem";
 import { Vector2D, Line } from "../../util/Vector";
 import { Ball } from "./Ball";
 import { PolygonMapItem } from './Polygon';
@@ -58,7 +63,11 @@ export class CircleCollider extends PolygonCollider {
 }
 
 export class CircleMapItem extends PolygonMapItem {
-  public static readonly imageURL = "img/item/circle.png";
+  public static readonly imageURL:string = "img/item/circle.png";
+  public static readonly Name:MapItemNames = "circle";
+  get name():MapItemNames {
+    return CircleMapItem.Name;
+  }
   get imgURL(): string {
     return CircleMapItem.imageURL;
   }

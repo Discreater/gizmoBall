@@ -26,6 +26,16 @@ export abstract class PolygonCollider extends Collider {
 
   public rotate(center: Vector2D, angle: Angle): IRotatable {
     this._vertexes.forEach(value => value.pointRotate(center, angle));
+    switch (angle.special) {
+      case "right-angle":
+        this._rotation = (this._rotation - 1 + 4) % 4;
+        break;
+      case "right-angle-reverse":
+        this._rotation = (this._rotation + 1) % 4;
+        break;
+      case "":
+        break;
+    }
     return this;
   }
 

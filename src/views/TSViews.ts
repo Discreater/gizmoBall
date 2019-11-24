@@ -59,21 +59,26 @@ class TSViews {
         },
         {
           label: "打开文件",
-          accelerator: "Ctrl+O"
+          accelerator: "Ctrl+O",
+          click: () => {
+            Controller.getInstance().open();
+          }
         },
         {
           type: "separator"
         },
         {
           label: "保存",
-          accelerator: "Ctrl+S"
+          accelerator: "Ctrl+S",
+          click: () => {
+            Controller.getInstance().save();
+          }
         },
         {
           label: "另存为",
           accelerator: "Ctrl+Shift+S",
           click: () => {
-            const controller = Controller.getInstance();
-            controller.saveAs();
+            Controller.getInstance().saveAs();
           }
         },
         {

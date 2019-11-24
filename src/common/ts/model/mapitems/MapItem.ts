@@ -8,12 +8,16 @@ export * from "./Polygon";
 export * from "./Triangle";
 export { Collider };
 
+
+export type MapItemNames = "square"|"triangle"|"circle"|"ball"|"absorber"
+
 export enum Direction {
   Up,
   Right,
   Down,
   Left
 }
+
 export interface IRotatable {
 
   /**
@@ -27,6 +31,10 @@ export interface IRotatable {
    * @param angle 旋转角
    */
   rotate(center: Vector2D, angle: Angle): IRotatable;
+}
+
+export function isRotatable(obj: any): obj is IRotatable {
+  return obj.rotate !== undefined;
 }
 
 export interface ICollisible {
@@ -59,6 +67,10 @@ export interface IZoomable {
   zoomTo(zoomCenter: Vector2D, zoom: number): IZoomable;
 }
 
+export function isZoomable(obj: any): obj is IZoomable {
+  return obj.zoomTo !== undefined;
+}
+
 export interface ITransmittable {
 
   /**
@@ -79,6 +91,7 @@ export interface ITransmittable {
 }
 
 export abstract class MapItem implements ICollisible, ITransmittable {
+  abstract get name():MapItemNames;
   get center(): Vector2D {
     return this.collider.center;
   }
@@ -132,4 +145,3 @@ export abstract class MapItem implements ICollisible, ITransmittable {
     this.collider.position = position;
   }
 }
-

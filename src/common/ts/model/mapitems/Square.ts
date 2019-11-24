@@ -3,7 +3,8 @@ import {
   ICollisible,
   IRotatable,
   IZoomable,
-  Direction
+  Direction,
+  MapItemNames
 } from "./MapItem";
 import { Vector2D, Angle } from "../../util/Vector";
 import { PolygonCollider, PolygonMapItem } from "./Polygon";
@@ -29,11 +30,14 @@ export class SquareCollider extends PolygonCollider {
 }
 
 export class SquareMapItem extends PolygonMapItem {
-
+  public get name():MapItemNames {
+    return SquareMapItem.Name;
+  }
   get imgURL(): string {
     return SquareMapItem.imageUrl;
   }
 
+  public static readonly Name:MapItemNames = "square";
   public static readonly imageUrl:string = "img/item/ball.png";
 
   constructor(x:number, y:number) {
