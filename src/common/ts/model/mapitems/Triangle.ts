@@ -1,11 +1,10 @@
 import {
-  PolygonCollider,
   MapItem,
   ICollisible,
   MapItemNames
 } from "./MapItem";
 import { Vector2D } from "../../util/Vector";
-import { PolygonMapItem } from './Polygon';
+import { PolygonMapItem, PolygonCollider } from './Polygon';
 
 export class TriangleCollider extends PolygonCollider {
   public get center(): Vector2D {

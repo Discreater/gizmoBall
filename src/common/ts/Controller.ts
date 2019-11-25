@@ -4,12 +4,12 @@ import {
   isRotatable,
   Direction,
   isZoomable,
-  MapItemNames,
-  Ball
+  MapItemNames
 } from "./model/mapitems/MapItem"
 import FileSystem from "./fs/FileSystem"
 import { Vector2D, Angle } from './util/Vector';
 import store from "../../store/index"
+import { Ball } from './model/mapitems/Ball';
 
 abstract class MapItemJSON {
   abstract name: MapItemNames;

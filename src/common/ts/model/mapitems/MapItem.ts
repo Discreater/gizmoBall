@@ -1,11 +1,11 @@
 import { Vector2D, Angle } from "../../util/Vector";
 import { Collider } from './Collider';
 
-export * from "./Ball";
-export * from "./Square";
-export * from "./Circle";
-export * from "./Polygon";
-export * from "./Triangle";
+// export * from "./Ball";
+// export * from "./Square";
+// export * from "./Circle";
+// export * from "./Polygon";
+// export * from "./Triangle";
 export { Collider };
 
 

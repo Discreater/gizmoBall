@@ -1,11 +1,11 @@
 import { MassPoint } from "../Physical";
 import {
   ICollisible,
-  CircleCollider,
   MapItem,
   MapItemNames
 } from "./MapItem";
 import { Vector2D } from "../../util/Vector";
+import { CircleCollider } from './Circle';
 
 export class Ball extends MapItem implements ICollisible {
   public get name():MapItemNames {

@@ -1,8 +1,9 @@
 import { PolygonMapItem } from './Polygon';
-import { MapItemNames, SquareCollider, ICollisible } from './MapItem';
+import { MapItemNames, ICollisible } from './MapItem';
 import { Vector2D } from '../../util/Vector';
 import { Ball } from './Ball';
 import Controller from '../../Controller';
+import { SquareCollider } from './Square';
 
 export class AbsorberMapItem extends PolygonMapItem {
   public static readonly imageURL:string = "img/item/circle.png";

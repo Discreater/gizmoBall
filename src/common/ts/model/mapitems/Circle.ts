@@ -1,12 +1,11 @@
 import {
   ICollisible,
-  PolygonCollider,
   MapItem,
   MapItemNames
 } from "./MapItem";
 import { Vector2D, Line } from "../../util/Vector";
 import { Ball } from "./Ball";
-import { PolygonMapItem } from './Polygon';
+import { PolygonMapItem, PolygonCollider } from './Polygon';
 
 export class CircleCollider extends PolygonCollider {
   constructor(position:Vector2D, protected _radius:number) {
