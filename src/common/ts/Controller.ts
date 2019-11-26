@@ -9,7 +9,7 @@ import {
 import FileSystem from "./fs/FileSystem"
 import { Vector2D, Angle } from './util/Vector';
 import store from "../../store/index"
-import { Ball } from './model/mapitems/Ball';
+import { Ball, itemMap } from './model/mapitems/MapItems';
 
 abstract class MapItemJSON {
   abstract name: MapItemNames;
@@ -24,6 +24,11 @@ export class Controller {
   public static getInstance() : Controller {
     return this.controller ?? (this.controller = new Controller());
   }
+
+  /**
+   * 当前打开的文件路径，若为空则表明未打开任何文件
+   */
+  private currentOpendFilePath: string | null = null;
   private mapItems: Map<number, MapItem>;
   private balls: Map<number, Ball>;
   private constructor() {
@@ -31,10 +36,26 @@ export class Controller {
     this.balls = new Map<number, Ball>();
   }
 
+  public get items():MapItem[] {
+    let mapItem :MapItem[] = [];
+    for (let i of this.mapItems) {
+      mapItem.push(i[1]);
+    }
+    return mapItem;
+  }
+
   /**
-   * 当前打开的文件路径，若为空则表明未打开任何文件
+   * 创建地图元素实例
+   * @param name 类型
+   * @param x
+   * @param y
+   * @returns 是否成功
    */
-  private currentOpendFilePath: string | null = null;
+  public createMapItem(name: MapItemNames, x: number, y:number): boolean {
+    const mapItem = new itemMap[name](x, y);
+    console.log(mapItem);
+    return this.handleAddItem(mapItem);
+  }
 
   /**
    * 打开文件
@@ -60,30 +81,6 @@ export class Controller {
     const content = this.mapItemsToJSON(this.mapItems);
     FileSystem.saveAs(content);
   }
-
-  /**
-   * 将mapItems转换为JSON格式string
-   */
-  private mapItemsToJSON(mapItems: Map<number, MapItem>): string {
-    let mapItemJSONs: MapItemJSON[] = [];
-    for (let item of mapItems) {
-      const mapItem:MapItem = item[1];
-      const mapItemJSON: MapItemJSON = {
-        name: mapItem.name,
-        position: mapItem.position,
-        rotation: isRotatable(mapItem) ? mapItem.rotation : undefined,
-        zoom: isZoomable(mapItem) ? mapItem.zoom : undefined
-      }
-      const json:MapItemJSON = mapItem as MapItemJSON;
-      console.log("as:");
-      console.log(json);
-      console.log("converted");
-      console.log(mapItemJSON);
-      mapItemJSONs.push(mapItemJSON);
-    }
-    return JSON.stringify(mapItemJSONs);
-  }
-
 
   private collidesWithOthers(mapItem:MapItem):boolean {
     for (let element of this.mapItems) {
@@ -201,12 +198,34 @@ export class Controller {
     // todo
   }
 
-
   /**
    * 停止游玩
    */
   public stopPlaying():void {
     // todo
+  }
+
+  /**
+   * 将mapItems转换为JSON格式string
+   */
+  private mapItemsToJSON(mapItems: Map<number, MapItem>): string {
+    let mapItemJSONs: MapItemJSON[] = [];
+    for (let item of mapItems) {
+      const mapItem:MapItem = item[1];
+      const mapItemJSON: MapItemJSON = {
+        name: mapItem.name,
+        position: mapItem.position,
+        rotation: isRotatable(mapItem) ? mapItem.rotation : undefined,
+        zoom: isZoomable(mapItem) ? mapItem.zoom : undefined
+      }
+      // const json:MapItemJSON = mapItem as MapItemJSON;
+      // console.log("as:");
+      // console.log(json);
+      // console.log("converted");
+      // console.log(mapItemJSON);
+      mapItemJSONs.push(mapItemJSON);
+    }
+    return JSON.stringify(mapItemJSONs);
   }
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="game-panel">
     <div ref="gameGrid" @drop="onDrop" @dragover.prevent="onDragover" @dragenter.prevent class="game-grid" style="backgroundImage: url(img/grid.png)">
-      <img v-for="(element, index) in elements" :key="index" :src="element.img" width="35px" height="35px" :style="`position: absolute;top:${element.y}px;left:${element.x}px`"/>
+      <img v-for="(item, index) in items" :key="index" :src="item.imgURL" width="35px" height="35px" :style="`position: absolute;top:${item.position.y}px;left:${item.position.x}px`"/>
     </div>
   </div>
 </template>
@@ -15,6 +15,8 @@ import {
   gridLength,
   gridLineLength
 } from '@/types/gizmo';
+import { itemMap, MapItem } from '../../common/ts/model/mapitems/MapItems';
+import Controller from '../../common/ts/Controller';
 
 @Component
 export default class GamePanel extends Vue {
@@ -23,7 +25,7 @@ export default class GamePanel extends Vue {
     gameGrid: HTMLElement
   }
 
-  elements: MapElement[] = [];
+  items: MapItem[] = [];
 
   private gridX!: number;
   private gridY!: number;
@@ -54,19 +56,23 @@ export default class GamePanel extends Vue {
   onDrop(event: DragEvent) {
     console.log('You dropped something!');
     const item = store.state.module1.draggingItem;
-    if (item === null) {
+    if (item === null || item.typeValue === 'select') {
       return
     }
-
     const element: MapElement = {
       ...item,
       x: event.clientX - this.gridX,
       y: event.clientY - this.gridY
     }
     this.formatPosition(element);
-    console.log(element.x + " + " + element.y);
+    // console.log(`拖到 ${element.x} + ${element.y}`);
 
-    this.elements.push(element);
+    if (Controller.getInstance().createMapItem(item.typeValue, element.x, element.y)) {
+      console.log(`--添加 ${item.typeValue} 成功`)
+      this.items = Controller.getInstance().items;
+    } else {
+      console.log(`--添加 ${item.typeValue} 失败`);
+    }
   }
 
   /**

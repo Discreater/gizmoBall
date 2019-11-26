@@ -2,12 +2,13 @@ import { MassPoint } from "../Physical";
 import {
   ICollisible,
   MapItem,
-  MapItemNames
+  MapItemNames,
+  ITransmittable
 } from "./MapItem";
 import { Vector2D } from "../../util/Vector";
 import { CircleCollider } from './Circle';
 
-export class Ball extends MapItem implements ICollisible {
+export class Ball extends MapItem {
   public get name():MapItemNames {
     return Ball.Name;
   }
@@ -15,6 +16,12 @@ export class Ball extends MapItem implements ICollisible {
     return this.collider.center;
   }
   public massPoint:MassPoint;
+
+  public translate(p:Vector2D):ITransmittable {
+    super.translate(p);
+    this.massPoint.translate(p);
+    return this;
+  }
   public static readonly Name:MapItemNames = "ball";
   public static readonly imageUrl:string = "img/item/ball.png";
 

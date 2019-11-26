@@ -8,8 +8,7 @@ import { Collider } from './Collider';
 // export * from "./Triangle";
 export { Collider };
 
-
-export type MapItemNames = "square"|"triangle"|"circle"|"ball"|"absorber"
+export type MapItemNames = "absorber"|"baffle-alpha"|"baffle-beta"|"ball"|"circle"|"pipe"|"pipe-turned"|"square"|"triangle";
 
 export enum Direction {
   Up,
@@ -79,7 +78,7 @@ export interface ITransmittable {
   position: Vector2D;
 
   /**
-   * 中心
+   * 所占格点的中心
    */
   center: Vector2D;
 
@@ -100,6 +99,9 @@ export abstract class MapItem implements ICollisible, ITransmittable {
     return this;
   }
   public crashDetect(crashable: ICollisible): boolean {
+    if (crashable instanceof MapItem) {
+      return this.collider.crashDetect(crashable.collider);
+    }
     return this.collider.crashDetect(crashable);
   }
   public crashHandle(crashable: ICollisible): void {
@@ -132,15 +134,17 @@ export abstract class MapItem implements ICollisible, ITransmittable {
    */
   abstract get imgURL(): string;
 
-  protected static currentID:number;
+  protected static currentID:number = 0;
   public readonly id:number;
+
   constructor(protected collider:Collider) {
-    this.id = MapItem.currentID++;
+    this.id = ++MapItem.currentID;
+    console.log(`MapItem ${this.id} init`);
   }
+
   public get position(): Vector2D {
     return this.collider.position;
   }
-
   public set position(position: Vector2D) {
     this.collider.position = position;
   }

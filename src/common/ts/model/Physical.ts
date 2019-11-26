@@ -33,7 +33,7 @@ export class MassPoint {
    * @param p 目标位置
    */
   public translate(p: Vector2D):MassPoint {
-    this._p = p;
+    this._p = p.clone();
     return this;
   }
 

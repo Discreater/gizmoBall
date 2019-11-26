@@ -36,7 +36,7 @@ export class TriangleMapItem extends PolygonMapItem {
     return TriangleMapItem.imageUrl;
   }
   public static readonly Name:MapItemNames = "triangle";
-  public static readonly imageUrl:string = "img/item/ball.png";
+  public static readonly imageUrl:string = "img/item/triangle.png";
   constructor(x:number, y:number) {
     super(new TriangleCollider(new Vector2D(x, y)));
   }

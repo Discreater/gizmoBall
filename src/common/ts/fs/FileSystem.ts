@@ -8,9 +8,12 @@ class FileSystem {
       remote.getCurrentWindow(),
       {
         title: "打开文件",
-        filters: [{ name: 'GIZMO文件', extensions: ["gizmo"] }]
+        filters: [{ name: 'GIZMO文件', extensions: ["gizmo"] }],
+        properties: ["openFile", "promptToCreate"]
       },
-      (filePaths, bookmarks) => {}
+      (filePaths) => {
+        if (filePaths && filePaths.length > 0) {}
+      }
     )
   }
 
@@ -29,12 +32,10 @@ class FileSystem {
         title: "文件另存为",
         filters: [{ name: 'GIZMO文件', extensions: ["gizmo"] }]
       },
-      (filename, bookmark) => {
+      (filename) => {
         if (filename) {
           FileSystem.save(content, filename);
         }
-        console.log(`--filename: ${filename}`);
-        console.log(`--bookmark: ${bookmark}`);
       }
     )
   }

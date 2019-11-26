@@ -9,7 +9,7 @@ import {
 import { Vector2D, Angle } from "../../util/Vector";
 import { PolygonCollider, PolygonMapItem } from "./Polygon";
 
-export class SquareCollider extends PolygonCollider {
+export class PipeCollider extends PolygonCollider {
   public get center(): Vector2D {
     return this.position.add(MapItem.vertical.clone().add(MapItem.horizontal).mult(0.5 * this.zoom));
   }
@@ -29,19 +29,19 @@ export class SquareCollider extends PolygonCollider {
   }
 }
 
-export class SquareMapItem extends PolygonMapItem {
+export class PipeMapItem extends PolygonMapItem {
   public get name():MapItemNames {
-    return SquareMapItem.Name;
+    return PipeMapItem.Name;
   }
   get imgURL(): string {
-    return SquareMapItem.imageUrl;
+    return PipeMapItem.imageUrl;
   }
 
-  public static readonly Name:MapItemNames = "square";
-  public static readonly imageUrl:string = "img/item/square.png";
+  public static readonly Name:MapItemNames = "pipe";
+  public static readonly imageUrl:string = "img/item/pipe_normal.png";
 
   constructor(x:number, y:number) {
-    super(new SquareCollider(new Vector2D(x, y)));
+    super(new PipeCollider(new Vector2D(x, y)));
   }
 
 }

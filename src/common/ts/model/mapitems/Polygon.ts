@@ -11,7 +11,7 @@ import { CircleCollider } from "./Circle";
 import { Ball } from "./Ball";
 import { Collider } from './Collider';
 
-export abstract class PolygonCollider extends Collider {
+export class PolygonCollider extends Collider {
   public zoomTo(zoomCenter: Vector2D, zoom: number): IZoomable {
     if (zoom !== this._zoom) {
       this._vertexes.forEach(value =>
@@ -39,7 +39,9 @@ export abstract class PolygonCollider extends Collider {
     return this;
   }
 
-  public abstract get center(): Vector2D;
+  public get center(): Vector2D {
+    return this.position.add(MapItem.vertical.clone().add(MapItem.horizontal).mult(0.5 * this.zoom));
+  };
 
   public translate(point: Vector2D): ITransmittable {
     this._vertexes.forEach(value =>
@@ -90,7 +92,13 @@ export abstract class PolygonCollider extends Collider {
         for (let edge of this.edges) {
           axes.push(edge.normalVector);
         }
-        return !this.separationOnAxes(axes, crashable);
+        let result:boolean = !this.separationOnAxes(axes, crashable);
+        if (result) {
+          console.log(this);
+          console.log("crashes");
+          console.log(crashable);
+        }
+        return result;
       }
     }
     return false;

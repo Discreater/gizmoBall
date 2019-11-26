@@ -233,6 +233,18 @@ export class Vector2D {
   public static reflect(v:Vector2D, axis:Vector2D):Vector2D {
     return v.component(axis).mult(-2).add(v);
   }
+
+  public static sum(vectors:Vector2D[]):Vector2D {
+    let sum:Vector2D = Vector2D.ZERO;
+    vectors.forEach((vertex:Vector2D):void => {
+      sum.add(vertex);
+    });
+    return sum;
+  }
+
+  public static center(polygon:Vector2D[]):Vector2D {
+    return Vector2D.sum(polygon).mult(1 / polygon.length);
+  }
 }
 
 export class Line {

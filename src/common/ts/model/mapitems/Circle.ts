@@ -38,6 +38,7 @@ export class CircleCollider extends PolygonCollider {
 
   public crashDetect(crashable: ICollisible): boolean {
     if (crashable instanceof PolygonCollider) {
+      console.log("circle crash detect with circle");
       let edges:Line[] = crashable.edges;
       let axes: Vector2D[] = [];
       for (let edge of edges) {

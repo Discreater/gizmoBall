@@ -1,5 +1,6 @@
 import TSViews from "../views/TSViews"
 import { ViewItem, Gizmo } from '@/types/gizmo';
+import { MapItem } from "@/common/ts/model/mapitems/MapItems"
 
 
 export interface Module1State {

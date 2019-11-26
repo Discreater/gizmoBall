@@ -1,3 +1,5 @@
+import { MapItemNames } from "@/common/ts/model/mapitems/MapItems";
+
 export interface ViewItem {
   typeValue: ItemType,
   img: string
@@ -10,8 +12,7 @@ export interface MapElement {
   img: string
 }
 
-export type ItemType = 'select' | 'ball' | 'absorber' | 'triangle' | 'circle' | 'square' |
-                        'pipe' | 'pipeTurned' | 'baffleAlpha' | 'baffleBeta'
+export type ItemType = 'select' | MapItemNames;
 
 export const gridLength: number = 35
 
@@ -51,15 +52,15 @@ export namespace Gizmo {
     img: 'img/item/pipe_normal.png'
   }
   export const pipeTurnedItem: ViewItem = {
-    typeValue: 'pipeTurned',
+    typeValue: 'pipe-turned',
     img: 'img/item/pipe_turned.png'
   }
   export const baffleAlphaItem: ViewItem = {
-    typeValue: 'baffleAlpha',
+    typeValue: 'baffle-alpha',
     img: 'img/item/baffle-mid.png'
   }
   export const baffleBetaItem: ViewItem = {
-    typeValue: 'baffleBeta',
+    typeValue: 'baffle-beta',
     img: 'img/item/baffle-mid.png'
   }
   export const sampleItems: ViewItem[] = [
@@ -76,12 +77,12 @@ export namespace Gizmo {
 
   const itemMap: Record<ItemType, ViewItem> = {
     'absorber': absorberItem,
-    'baffleAlpha': baffleAlphaItem,
-    'baffleBeta': baffleBetaItem,
+    'baffle-alpha': baffleAlphaItem,
+    'baffle-beta': baffleBetaItem,
     'ball': ballItem,
     'circle': circleItem,
     'pipe': pipeItem,
-    'pipeTurned': pipeTurnedItem,
+    'pipe-turned': pipeTurnedItem,
     'select': selectItem,
     'square': squareItem,
     'triangle': triangleItem

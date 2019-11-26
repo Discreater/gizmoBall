@@ -6,7 +6,7 @@ import Controller from '../../Controller';
 import { SquareCollider } from './Square';
 
 export class AbsorberMapItem extends PolygonMapItem {
-  public static readonly imageURL:string = "img/item/circle.png";
+  public static readonly imageURL:string = "img/item/absorber.png";
   public static readonly Name:MapItemNames = "absorber";
   get name():MapItemNames {
     return AbsorberMapItem.Name;
