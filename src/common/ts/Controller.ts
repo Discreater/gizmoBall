@@ -9,7 +9,7 @@ import {
 import FileSystem from "./fs/FileSystem"
 import { Vector2D, Angle } from './util/Vector';
 import store from "../../store/index"
-import { Ball, itemMap } from './model/mapitems/MapItems';
+import { Ball, itemMap, TriangleMapItem } from './model/mapitems/MapItems';
 import { Physical } from './model/Physical';
 
 abstract class MapItemJSON {
@@ -17,6 +17,18 @@ abstract class MapItemJSON {
   abstract position: Vector2D;
   abstract zoom?: number;
   abstract rotation?: Direction;
+  public static createFromJSON(obj: any): MapItemJSON | null {
+    if (obj.name && obj.position && obj.position.x && obj.position.y) {
+      return {
+        name: obj.name,
+        position: new Vector2D(obj.position.x, obj.position.y),
+        zoom: obj.zoom,
+        rotation: obj.rotation
+      };
+    } else {
+      return null;
+    }
+  }
 }
 
 
@@ -63,7 +75,62 @@ export class Controller {
   /**
    * 打开文件
    */
-  public open() {}
+  public open() {
+    FileSystem.open((path, data) => {
+      let items = this.readFromJSON(data);
+      if (items != null) {
+        this.mapItems.clear();
+        this.currentOpendFilePath = path;
+        for (let item of items) {
+          this.mapItems.set(item.id, item);
+        }
+      }
+    })
+  }
+
+  private readFromJSON(content: string): MapItem[] | null {
+    console.log(content);
+    const jsonItems = JSON.parse(content);
+    let items: MapItem[] = [];
+    if (jsonItems instanceof Array) {
+      for (let jsonItem of jsonItems) {
+        console.log(jsonItem);
+        const item = MapItemJSON.createFromJSON(jsonItem);
+        if (item !== null) {
+          console.log('is MapItemsJSON');
+          const mapItem = new itemMap[item.name](item.position.x, item.position.y);
+          // 检测是否旋转
+          if (isRotatable(mapItem)) {
+            if (item.rotation) {
+              mapItem.rotation = item.rotation;
+            } else {
+              return null;
+            }
+          }
+          // 检测是否放缩
+          if (isZoomable(mapItem)) {
+            if (item.zoom) {
+              mapItem.zoomTo(mapItem.position, item.zoom);
+            } else {
+              return null;
+            }
+          }
+          items.push(mapItem);
+        } else {
+          return null;
+        }
+      }
+    }
+    // 检测是否发生碰撞
+    for (let from of items) {
+      for (let to of items) {
+        if (from.id !== to.id && from.crashDetect(to)) {
+          return null;
+        }
+      }
+    }
+    return items;
+  }
 
   /**
    * 保存文件
@@ -167,6 +234,9 @@ export class Controller {
     let mapItem:MapItem | undefined = this.mapItems.get(id);
     if (mapItem !== undefined && isZoomable(mapItem)) {
       const zoom:number = mapItem.zoom;
+      if (zoom <= 1) {
+        return false;
+      }
       mapItem.zoomTo(mapItem.position, zoom - 1);
       if (this.collidesWithOthers(mapItem)) {
         mapItem.zoomTo(mapItem.position, zoom);
@@ -184,9 +254,10 @@ export class Controller {
   public handleRotate(id:number):boolean {
     let mapItem:MapItem | undefined = this.mapItems.get(id);
     if (mapItem !== undefined && isRotatable(mapItem)) {
-      mapItem.rotate(mapItem.center, Angle.RIGHT_ANGLE_REVERSE);
+      mapItem.rotate(mapItem.center, Angle.RIGHT_ANGLE);
+      console.log(this.mapItems);
       if (this.collidesWithOthers(mapItem)) {
-        mapItem.rotate(mapItem.center, Angle.RIGHT_ANGLE);
+        mapItem.rotate(mapItem.center, Angle.RIGHT_ANGLE_REVERSE);
         return false;
       }
       return true;
@@ -209,8 +280,7 @@ export class Controller {
     this.isPlaying = true;
     const timer:NodeJS.Timeout = setInterval(() => {
       if (this.isPlaying) {
-        for (let kv of this.balls) {
-          const ball:Ball = kv[1];
+        for (let [, ball] of this.balls) {
           // console.log(Physical.gravity);
           // console.log(ball.massPoint.v);
           ball.massPoint.tick();
@@ -238,8 +308,7 @@ export class Controller {
             ball.massPoint.translate(new Vector2D(x, delta + r));
           }
           ball.translate(Vector2D.difference(ball.position, ball.center).add(ball.massPoint.p));
-          for (let kv of this.mapItems) {
-            const item:MapItem = kv[1];
+          for (let [, item] of this.mapItems) {
             if (item.id != ball.id) {
               // console.log("detecting...");
               if (item.crashDetect(ball)) {
@@ -276,11 +345,6 @@ export class Controller {
         rotation: isRotatable(mapItem) ? mapItem.rotation : undefined,
         zoom: isZoomable(mapItem) ? mapItem.zoom : undefined
       }
-      // const json:MapItemJSON = mapItem as MapItemJSON;
-      // console.log("as:");
-      // console.log(json);
-      // console.log("converted");
-      // console.log(mapItemJSON);
       mapItemJSONs.push(mapItemJSON);
     }
     return JSON.stringify(mapItemJSONs);

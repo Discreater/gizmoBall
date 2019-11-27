@@ -220,6 +220,9 @@ export class Vector2D {
 
   /**
    * 点绕点旋转计算
+   * @param p 被旋转的点
+   * @param center 旋转中心
+   * @param angle 旋转角度
    */
   public static pointRotate(p:Vector2D, center:Vector2D, angle:Angle):Vector2D {
     return Vector2D.difference(p, center).vectorRotate(angle).add(center);

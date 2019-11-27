@@ -13,44 +13,6 @@ import { Collider } from './Collider';
 import { Physical } from '../Physical';
 
 export class PolygonCollider extends Collider {
-  public zoomTo(zoomCenter: Vector2D, zoom: number): IZoomable {
-    if (zoom !== this._zoom) {
-      this._vertexes.forEach(value =>
-        value.add(
-          Vector2D.difference(value, zoomCenter).mult(zoom - this._zoom)
-        )
-      );
-    }
-    this._zoom = zoom;
-    return this;
-  }
-
-  public rotate(center: Vector2D, angle: Angle): IRotatable {
-    this._vertexes.forEach(value => value.pointRotate(center, angle));
-    switch (angle.special) {
-      case "right-angle":
-        this._rotation = (this._rotation - 1 + 4) % 4;
-        break;
-      case "right-angle-reverse":
-        this._rotation = (this._rotation + 1) % 4;
-        break;
-      case "":
-        break;
-    }
-    return this;
-  }
-
-  public get center(): Vector2D {
-    return this.position.add(MapItem.vertical.clone().add(MapItem.horizontal).mult(0.5 * this.zoom));
-  };
-
-  public translate(point: Vector2D): ITransmittable {
-    this._vertexes.forEach(value =>
-      value.add(Vector2D.difference(point, this._position))
-    );
-    this._position = point.clone();
-    return this;
-  }
 
   protected _edges: Line[];
 
@@ -68,6 +30,10 @@ export class PolygonCollider extends Collider {
     return this._vertexes.map(item => item.clone());
   }
 
+  public get center(): Vector2D {
+    return this.position.add(MapItem.vertical.clone().add(MapItem.horizontal).mult(0.5 * this.zoom));
+  };
+
   constructor(
     // 核心属性，顶点与边相绑定
     protected _vertexes: Vector2D[],
@@ -79,6 +45,43 @@ export class PolygonCollider extends Collider {
       (item, index, array) => new Line(item, array[(index + 1) % array.length])
     );
   }
+
+  public zoomTo(zoomCenter: Vector2D, zoom: number): IZoomable {
+    if (zoom !== this._zoom) {
+      this._vertexes.forEach(value =>
+        value.as(Vector2D.add(
+          zoomCenter,
+          Vector2D.difference(value, zoomCenter).mult(zoom / this._zoom)
+        ))
+      );
+    }
+    this._zoom = zoom;
+    return this;
+  }
+
+  public rotate(center: Vector2D, angle: Angle): IRotatable {
+    this._vertexes.forEach(value => value.pointRotate(center, angle));
+    switch (angle.special) {
+      case "right-angle-reverse":
+        this._rotation = (this._rotation - 1 + 4) % 4;
+        break;
+      case "right-angle":
+        this._rotation = (this._rotation + 1) % 4;
+        break;
+      case "":
+        break;
+    }
+    return this;
+  }
+
+  public translate(point: Vector2D): ITransmittable {
+    this._vertexes.forEach(value =>
+      value.add(Vector2D.difference(point, this._position))
+    );
+    this._position = point.clone();
+    return this;
+  }
+
 
   public crashDetect(crashable: ICollisible): boolean {
     if (crashable instanceof PolygonCollider) {
@@ -93,13 +96,7 @@ export class PolygonCollider extends Collider {
         for (let edge of this.edges) {
           axes.push(edge.normalVector);
         }
-        let result:boolean = !this.separationOnAxes(axes, crashable);
-        if (result) {
-          console.log(this);
-          console.log("crashes");
-          console.log(crashable);
-        }
-        return result;
+        return !this.separationOnAxes(axes, crashable);
       }
     }
     return false;

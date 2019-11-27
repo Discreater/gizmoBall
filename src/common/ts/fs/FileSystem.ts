@@ -3,7 +3,7 @@ import fs from "fs";
 
 class FileSystem {
 
-  public static open() {
+  public static open(callback: (path: string, data: string)=>void) {
     remote.dialog.showOpenDialog(
       remote.getCurrentWindow(),
       {
@@ -12,7 +12,17 @@ class FileSystem {
         properties: ["openFile", "promptToCreate"]
       },
       (filePaths) => {
-        if (filePaths && filePaths.length > 0) {}
+        if (filePaths && filePaths[0]) {
+          const filePath = filePaths[0];
+          fs.readFile(filePath, (err, data) => {
+            if (err) {
+              console.log('open file error:');
+              console.log(err);
+            } else {
+              callback(filePath, data.toString());
+            }
+          })
+        }
       }
     )
   }
@@ -20,7 +30,7 @@ class FileSystem {
   public static save(content: string, path: string) {
     fs.writeFile(path, content, err => {
       if (err) {
-        // console.log(`save file error: ${err}`);
+        console.log(`save file error: ${err}`);
       }
     })
   }

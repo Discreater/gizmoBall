@@ -36,7 +36,7 @@ export default class GamePanel extends Vue {
   items: MapItem[] = [];
 
   get currentItemId(): number {
-    if (store.state.module1.panelCurrentItem) {
+    if (store.state.module1.currentMode === 'LAYOUT' && store.state.module1.panelCurrentItem) {
       return store.state.module1.panelCurrentItem.id;
     } else {
       return 0;
