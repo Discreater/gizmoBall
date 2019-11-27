@@ -6,6 +6,7 @@ import {
 import { Vector2D, Line } from "../../util/Vector";
 import { Ball } from "./Ball";
 import { PolygonMapItem, PolygonCollider } from './Polygon';
+import { Physical } from '../Physical';
 
 export class CircleCollider extends PolygonCollider {
   constructor(position:Vector2D, protected _radius:number) {
@@ -38,15 +39,13 @@ export class CircleCollider extends PolygonCollider {
 
   public crashDetect(crashable: ICollisible): boolean {
     if (crashable instanceof PolygonCollider) {
-      console.log("circle crash detect with circle");
       let edges:Line[] = crashable.edges;
       let axes: Vector2D[] = [];
       for (let edge of edges) {
         axes.push(edge.normalVector);
       }
       if (axes.length === 0 && crashable instanceof CircleCollider) {
-        const distance:number = Math.sqrt(Math.pow(this.center.x - crashable.center.x, 2)
-         + Math.pow(this.center.y - crashable.center.y, 2));
+        const distance:number = Vector2D.difference(this.center, crashable.center).radius;
         return distance < Math.abs(this.radius + crashable.radius);
       } else {
         return PolygonCollider.polygonCollidesWithCircle(crashable, this);
@@ -57,7 +56,8 @@ export class CircleCollider extends PolygonCollider {
 
   public crashHandle(crashable: ICollisible):void {
     if (crashable instanceof Ball) {
-      crashable.massPoint.setVelocity(crashable.massPoint.v.reflet(Vector2D.difference(crashable.center, this.center)));
+      let axis = Vector2D.difference(crashable.center, this.center);
+      Physical.surfaceVelocityReflect(crashable.massPoint, axis);
     }
   }
 }

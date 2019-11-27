@@ -10,6 +10,7 @@ import { Vector2D, Angle, Line } from "../../util/Vector";
 import { CircleCollider } from "./Circle";
 import { Ball } from "./Ball";
 import { Collider } from './Collider';
+import { Physical } from '../Physical';
 
 export class PolygonCollider extends Collider {
   public zoomTo(zoomCenter: Vector2D, zoom: number): IZoomable {
@@ -170,17 +171,23 @@ export class PolygonCollider extends Collider {
 
   public crashHandle(crashable: ICollisible): void {
     if (crashable instanceof Ball) {
-      let closestLine: Line = this._edges[0];
-      let ballPos:Vector2D = crashable.massPoint.p;
-      let closestDistance: number = this._edges[0].distance(ballPos);
-      this._edges.forEach(value => {
-        let thisDistance:number = value.distance(ballPos);
-        if (closestDistance > thisDistance) {
-          closestDistance = thisDistance;
-          closestLine = value;
+      let refletLine: Line | null = null;
+      let ballPos:Vector2D = crashable.massPoint.p.add(crashable.massPoint.v.mult(-Physical.tick));
+      for (let value of this._edges) {
+        const v1:Vector2D = Vector2D.difference(ballPos, value.p1);
+        const v2:Vector2D = Vector2D.difference(ballPos, value.p2);
+        if (refletLine === null) {
+          const axis:Vector2D = value.normalVector;
+          if (v1.dot(axis) >= 0 && v2.dot(axis) >= 0) {
+            refletLine = value;
+            break;
+          }
         }
-      });
-      crashable.massPoint.setVelocity(crashable.massPoint.v.reflet(closestLine.normalVector));
+      }
+      if (refletLine instanceof Line) {
+        const axis:Vector2D = refletLine.normalVector;
+        Physical.surfaceVelocityReflect(crashable.massPoint, axis);
+      }
     }
   }
 }
@@ -195,6 +202,9 @@ export abstract class PolygonMapItem extends MapItem implements IRotatable, IZoo
   }
   get rotation():Direction {
     return this.collider.rotation;
+  }
+  set rotation(rotation:Direction) {
+    this.collider.rotation = rotation;
   }
   rotate(center: Vector2D, angle:Angle): IRotatable {
     this.collider.rotate(center, angle);

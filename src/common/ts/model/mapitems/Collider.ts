@@ -26,13 +26,13 @@ export abstract class Collider implements ICollisible, ITransmittable, IRotatabl
   public get rotation(): Direction {
     return this._rotation;
   }
-  // public set rotation(rotation: Direction) {
-  //   let times: number = (this._rotation - rotation + 4) % 4;
-  //   for (let i: number = 0; i < times; i++) {
-  //     this.rotate(this.center, Angle.RIGHT_ANGLE_REVERSE);
-  //   }
-  //   this._rotation = rotation;
-  // }
+  public set rotation(rotation: Direction) {
+    let times: number = (this._rotation - rotation + 4) % 4;
+    for (let i: number = 0; i < times; i++) {
+      this.rotate(this.center, Angle.RIGHT_ANGLE_REVERSE);
+    }
+    this._rotation = rotation;
+  }
   public abstract rotate(center:Vector2D, angle:Angle):IRotatable;
 
 

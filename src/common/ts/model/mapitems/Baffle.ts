@@ -6,15 +6,16 @@ export class BaffleCollider extends PolygonCollider {
   constructor(position:Vector2D) {
 
     const vertical:Vector2D = MapItem.vertical.clone().mult(0.25);
+    const horizontal:Vector2D = MapItem.horizontal.clone().mult(2);
     super(
       [
         position.clone(),
         position.clone().add(vertical),
         position
           .clone()
-          .add(MapItem.horizontal)
+          .add(horizontal)
           .add(vertical),
-        position.clone().add(MapItem.horizontal)
+        position.clone().add(horizontal)
       ],
       position
     );
@@ -22,7 +23,7 @@ export class BaffleCollider extends PolygonCollider {
 
 }
 
-export abstract class BaffleMapItem extends PolygonMapItem {
+export abstract class BaffleMapItem extends MapItem {
   get imgURL(): string {
     return BaffleMapItem.imageURL;
   }

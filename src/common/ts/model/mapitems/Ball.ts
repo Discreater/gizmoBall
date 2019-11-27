@@ -1,4 +1,4 @@
-import { MassPoint } from "../Physical";
+import { MassPoint, Physical } from "../Physical";
 import {
   ICollisible,
   MapItem,
@@ -17,9 +17,17 @@ export class Ball extends MapItem {
   }
   public massPoint:MassPoint;
 
+  public crashHandle(crashable:ICollisible):void {
+    if (crashable instanceof Ball) {
+      Physical.perfectElasticCollision(this.massPoint, crashable.massPoint);
+    } else {
+      super.crashHandle(crashable);
+    }
+  }
+
   public translate(p:Vector2D):ITransmittable {
     super.translate(p);
-    this.massPoint.translate(p);
+    this.massPoint.translate(this.center);
     return this;
   }
   public static readonly Name:MapItemNames = "ball";
@@ -32,5 +40,6 @@ export class Ball extends MapItem {
   constructor(x:number, y:number) {
     super(new CircleCollider(new Vector2D(x, y), MapItem.gridScale / 2));
     this.massPoint = new MassPoint();
+    this.massPoint.translate(this.center);
   }
 }

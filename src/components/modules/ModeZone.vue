@@ -26,6 +26,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import store from "@/store/index"
+import Controller from '@/common/ts/Controller';
 @Component
 export default class ModeZone extends Vue {
 
@@ -35,10 +36,12 @@ export default class ModeZone extends Vue {
 
   private changeToLayoutMode() {
     store.commit.changeMode('LAYOUT');
+    Controller.getInstance().stopPlaying();
   }
 
   private changeToPlayMode() {
     store.commit.changeMode('PLAY');
+    Controller.getInstance().startPlaying();
   }
 }
 </script>

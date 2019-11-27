@@ -1,8 +1,40 @@
 import { Vector2D } from "../util/Vector";
 
 export class Physical {
-  public static readonly gravity:Vector2D = new Vector2D(0, 9.8);
-  public static readonly tick:number = 0.01;
+  public static readonly gravity:Vector2D = new Vector2D(0, 15);
+  public static readonly tick:number = 0.025;
+
+
+  /**
+   * 表面反弹
+   * @param massPoint 质点
+   * @param axis 反弹面法向量，指向反弹面的外侧
+   */
+  public static surfaceVelocityReflect(massPoint:MassPoint, axis:Vector2D):void {
+    const v:Vector2D = massPoint.v;
+    if (v.dot(axis) < 0) {
+      massPoint.setVelocity(massPoint.v.reflet(axis));
+    }
+  }
+
+  /**
+   * 两质点完全弹性碰撞
+   * @param m1 质点1
+   * @param m2 质点2
+   */
+  public static perfectElasticCollision(m1:MassPoint, m2:MassPoint):void {
+    const v1:Vector2D = m1.v,
+      v2:Vector2D = m2.v,
+      axis:Vector2D = Vector2D.difference(m2.p, m1.p),
+      reflectLine:Vector2D = axis.normalVector;
+    if (axis.dot(v1) > 0) {
+      // 轴向连线分量交换
+      const newV1:Vector2D = v2.component(axis).add(v1.component(reflectLine));
+      const newV2:Vector2D = v1.component(axis).add(v2.component(reflectLine));
+      m1.setVelocity(newV1);
+      m2.setVelocity(newV2);
+    }
+  }
 }
 
 export class MassPoint {
@@ -52,6 +84,9 @@ export class MassPoint {
    */
   public changeVelocity(t: number = Physical.tick):MassPoint {
     this._v.add(Vector2D.mult(this._a, t));
+    if (this._v.radius >= 200) {
+      this._v.mult(200 / this._v.radius);
+    }
     return this;
   }
 
@@ -90,4 +125,5 @@ export class MassPoint {
     this._a.as(a);
     return this;
   }
+
 }

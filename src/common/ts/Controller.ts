@@ -10,6 +10,7 @@ import FileSystem from "./fs/FileSystem"
 import { Vector2D, Angle } from './util/Vector';
 import store from "../../store/index"
 import { Ball, itemMap } from './model/mapitems/MapItems';
+import { Physical } from './model/Physical';
 
 abstract class MapItemJSON {
   abstract name: MapItemNames;
@@ -21,6 +22,8 @@ abstract class MapItemJSON {
 
 export class Controller {
   private static controller : Controller;
+  public static readonly maxGridCount:number = 20;
+  public static readonly maxXY:number = Controller.maxGridCount * MapItem.gridScale;
   public static getInstance() : Controller {
     return this.controller ?? (this.controller = new Controller());
   }
@@ -191,11 +194,65 @@ export class Controller {
     return false;
   }
 
+  private isPlaying:boolean = false;
+
   /**
    * 开始游玩模式
    */
   public startPlaying():void {
     // todo
+
+    for (let kv of this.balls) {
+      const ball:Ball = kv[1];
+      ball.massPoint.setAcceleration(Physical.gravity);
+    }
+    this.isPlaying = true;
+    const timer:NodeJS.Timeout = setInterval(() => {
+      if (this.isPlaying) {
+        for (let kv of this.balls) {
+          const ball:Ball = kv[1];
+          // console.log(Physical.gravity);
+          // console.log(ball.massPoint.v);
+          ball.massPoint.tick();
+          const center:Vector2D = ball.center;
+          const x:number = center.x,
+            y:number = center.y;
+          const r:number = MapItem.gridScale * 0.5;
+          const v:Vector2D = ball.massPoint.v;
+          const m:number = Controller.maxXY;
+          const delta:number = 0;
+          if (x + r > m) {
+            ball.massPoint.setVelocity(new Vector2D(-Math.abs(v.x), v.y));
+            ball.massPoint.translate(new Vector2D(m - r - delta, y));
+          }
+          if (x - r < 0) {
+            ball.massPoint.setVelocity(new Vector2D(Math.abs(v.x), v.y));
+            ball.massPoint.translate(new Vector2D(delta + r, y));
+          }
+          if (y + r > m) {
+            ball.massPoint.setVelocity(new Vector2D(v.x, -Math.abs(v.y)));
+            ball.massPoint.translate(new Vector2D(x, m - r - delta));
+          }
+          if (y - r < 0) {
+            ball.massPoint.setVelocity(new Vector2D(v.x, Math.abs(v.y)));
+            ball.massPoint.translate(new Vector2D(x, delta + r));
+          }
+          ball.translate(Vector2D.difference(ball.position, ball.center).add(ball.massPoint.p));
+          for (let kv of this.mapItems) {
+            const item:MapItem = kv[1];
+            if (item.id != ball.id) {
+              // console.log("detecting...");
+              if (item.crashDetect(ball)) {
+                // console.log("detected!")
+                item.crashHandle(ball);
+              }
+            }
+          }
+        }
+      } else {
+        clearInterval(timer);
+      }
+    }, 1);
   }
 
   /**
@@ -203,6 +260,7 @@ export class Controller {
    */
   public stopPlaying():void {
     // todo
+    this.isPlaying = false;
   }
 
   /**
