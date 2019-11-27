@@ -5,6 +5,10 @@ export interface ViewItem {
   img: string
 }
 
+export function isViewItem(obj: any): obj is ViewItem {
+  return obj.typeValue !== undefined;
+}
+
 export interface MapElement {
   x: number,
   y: number,
@@ -14,11 +18,12 @@ export interface MapElement {
 
 export type ItemType = 'select' | MapItemNames;
 
-export const gridLength: number = 35
-
-export const gridLineLength: number = 1
 
 export namespace Gizmo {
+  export const gridLength: number = 35
+
+  export const gridLineLength: number = 1
+
   export const sampleItem: ViewItem = {
     typeValue: 'select',
     img: "img/item/select.png"

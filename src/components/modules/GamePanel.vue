@@ -15,11 +15,12 @@ import store from "@/store/index";
 import {
   ViewItem,
   MapElement,
-  gridLength,
-  gridLineLength
+  isViewItem,
+  Gizmo
 } from '@/types/gizmo';
 import { itemMap, MapItem } from '../../common/ts/model/mapitems/MapItems';
 import Controller from '../../common/ts/Controller';
+import { Vector2D } from '../../common/ts/util/Vector';
 
 @Component({
   components: {
@@ -75,14 +76,14 @@ export default class GamePanel extends Vue {
    * 处理从组件栏拖动到网格上的dragover事件
    */
   onDragover(event: DragEvent) {
-    // const itemString = event.dataTransfer!.getData("text/plain");
     const item = store.state.module1.draggingItem;
     if (item === null) {
       event.dataTransfer!.dropEffect = "none";
-      return
+    } else if (isViewItem(item)) {
+      event.dataTransfer!.dropEffect = "copy";
+    } else if (item instanceof MapItem) {
+      event.dataTransfer!.dropEffect = "move";
     }
-    // console.log(item.value);
-    event.dataTransfer!.dropEffect = "copy";
   }
 
   /**
@@ -90,33 +91,37 @@ export default class GamePanel extends Vue {
    */
   onDrop(event: DragEvent) {
     // console.log('You dropped something!');
+    console.log("drop");
+    console.log(event);
     const item = store.state.module1.draggingItem;
-    if (item === null || item.typeValue === 'select') {
+    if (item === null) {
       return
     }
-    const element: MapElement = {
-      ...item,
-      x: event.clientX - this.gridX,
-      y: event.clientY - this.gridY
-    }
-    this.formatPosition(element);
-    // console.log(`拖到 ${element.x} + ${element.y}`);
-
-    if (Controller.getInstance().createMapItem(item.typeValue, element.x, element.y)) {
-      console.log(`--添加 ${item.typeValue} 成功`)
-      // this.items = Controller.getInstance().items;
-    } else {
-      console.log(`--添加 ${item.typeValue} 失败`);
+    const offset = store.state.module1.draggingItemOffset;
+    const position = new Vector2D(event.clientX - this.gridX - offset.x, event.clientY - this.gridY - offset.y);
+    if (isViewItem(item) && item.typeValue !== 'select') {
+      this.formatPosition(position, 'floor');
+      Controller.getInstance().createMapItem(item.typeValue, position.x, position.y)
+    } else if (item instanceof MapItem) {
+      this.formatPosition(position, 'round')
+      Controller.getInstance().handleDraggingItem(item.id, position);
     }
   }
 
   /**
    * 确定实际所放的位置
    */
-  private formatPosition(element: MapElement) {
-    const cellLength = gridLength + gridLineLength;
-    element.x = Math.floor(element.x / cellLength) * cellLength;
-    element.y = Math.floor(element.y / cellLength) * cellLength;
+  private formatPosition(position: Vector2D, options: 'round' | 'floor') {
+    const cellLength = Gizmo.gridLength + Gizmo.gridLineLength;
+    if (options == 'round') {
+      // 适用于从item zone拖放
+      position.x = Math.round(position.x / cellLength) * cellLength;
+      position.y = Math.round(position.y / cellLength) * cellLength;
+    } else {
+      // 适用于从game panel拖放
+      position.x = Math.floor(position.x / cellLength) * cellLength;
+      position.y = Math.floor(position.y / cellLength) * cellLength;
+    }
   }
 }
 </script>

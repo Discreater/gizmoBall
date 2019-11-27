@@ -1,13 +1,20 @@
 <template>
-  <img :class="cssClass" ref="img" :src="item.imgURL" width="35px" height="35px"
+  <img @dragstart="onDragstart($event)" @dragend="onDragend()" :class="cssClass"
+    ref="img" :src="item.imgURL" :width="`${size}px`" :height="`${size}px`" :draggable="imageDraggable"
     :style="`position: absolute;top:${item.position.y}px;left:${item.position.x}px;transform: rotate(${rotation}deg)`"/>
 </template>
 
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { MapItem, isRotatable } from '../../common/ts/model/mapitems/MapItems';
+import {
+  MapItem,
+  isRotatable,
+  isZoomable
+} from '../../common/ts/model/mapitems/MapItems';
 import store from '@/store';
+import { Vector2D } from '../../common/ts/util/Vector';
+import { Gizmo } from "@/types/gizmo"
 
 @Component
 export default class ItemImage extends Vue {
@@ -28,6 +35,34 @@ export default class ItemImage extends Vue {
     }
     return 0;
   }
+
+  private readonly defaultSize: number = Gizmo.gridLength + Gizmo.gridLineLength;
+
+  get size(): number {
+    let result: number = this.defaultSize - 1;
+    if (isZoomable(this.item)) {
+      result = this.item.zoom * (this.defaultSize) - 1;
+    }
+    return result;
+  }
+
+  get imageDraggable(): boolean {
+    const m = store.state.module1;
+    if (m.currentMode == 'LAYOUT' && m.toolZoneCurrentItem.typeValue == 'select') {
+      return true;
+    }
+    return false;
+  }
+
+  onDragstart(event: DragEvent) {
+    store.commit.changeDraggingItemOffset(new Vector2D(event.offsetX, event.offsetY));
+    store.commit.changeDraggingItem(this.item);
+  }
+
+  onDragend() {
+    store.commit.changeDraggingItem(null);
+  }
+
 }
 </script>
 

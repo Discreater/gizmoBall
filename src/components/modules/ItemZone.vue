@@ -26,6 +26,7 @@ import {
 import store from "@/store/index"
 import { ViewItem, Gizmo, ItemType } from "@/types/gizmo";
 import { itemMap } from '../../common/ts/model/mapitems/MapItems';
+import { Vector2D } from '../../common/ts/util/Vector';
 
 @Component
 export default class ItemZone extends Vue {
@@ -34,8 +35,8 @@ export default class ItemZone extends Vue {
     return store.state.module1.currentMode;
   }
 
-  length: number = 48;
-  currentItem: ItemType = 'select';
+  private length: number = 48;
+  private currentItem: ItemType = 'select';
 
   @Watch('currentItem')
   onCurrentItemChanged(val: ItemType, oldVal: ItemType) {
@@ -45,6 +46,7 @@ export default class ItemZone extends Vue {
   readonly itemss: ViewItem[][] = Gizmo.itemss
 
   onDragstart(item: ViewItem, event: DragEvent) {
+    store.commit.changeDraggingItemOffset(new Vector2D(0, 0));
     store.commit.changeDraggingItem(item);
   }
 
