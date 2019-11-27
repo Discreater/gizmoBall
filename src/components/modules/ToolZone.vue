@@ -1,5 +1,5 @@
 <template>
-  <div class="tool-zone" :style="'pointer-events: ' + (currentMode=='LAYOUT' ? 'auto' : 'none')">
+  <div class="tool-zone" :style="'pointer-events: ' + (available ? 'auto' : 'none')">
     <table class="tool-table" width="100%">
       <caption class="caption">工具栏</caption>
       <tr class="two-tool">
@@ -25,17 +25,39 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import store from "@/store/index"
+import Controller from '../../common/ts/Controller';
+import { MapItem } from '../../common/ts/model/mapitems/MapItems';
 
 @Component
 export default class ToolZone extends Vue {
-  get currentMode() {
-    return store.state.module1.currentMode;
+  get available(): boolean {
+    const m = store.state.module1;
+    return m.currentMode === 'LAYOUT' && m.panelCurrentItem != null;
   }
   length: number = 50;
-  rotate() {}
-  remove() {}
-  zoomin() {}
-  zoomout() {}
+  get currentItem(): MapItem | null {
+    return store.state.module1.panelCurrentItem;
+  }
+  rotate() {
+    if (this.available && this.currentItem) {
+      Controller.getInstance().handleRotate(this.currentItem.id);
+    }
+  }
+  remove() {
+    if (this.available && this.currentItem) {
+      Controller.getInstance().handleDeleteItem(this.currentItem.id);
+    }
+  }
+  zoomin() {
+    if (this.available && this.currentItem) {
+      Controller.getInstance().handleZoomIn(this.currentItem.id);
+    }
+  }
+  zoomout() {
+    if (this.available && this.currentItem) {
+      Controller.getInstance().handleZoomOut(this.currentItem.id);
+    }
+  }
 }
 </script>
 

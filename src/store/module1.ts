@@ -9,7 +9,7 @@ export interface Module1State {
   gridSize: number,
   draggingItem: ViewItem | null,
   toolZoneCurrentItem: ViewItem,
-  panelCurrentItem: ViewItem | null
+  panelCurrentItem: MapItem | null
 }
 
 export default {
@@ -37,7 +37,7 @@ export default {
     changeToolZoneCurrentItem(state: Module1State, toolZoneCurrentItem: ViewItem) {
       state.toolZoneCurrentItem = toolZoneCurrentItem;
     },
-    changePanelCurrentItem(state: Module1State, panelCurrentItem: ViewItem) {
+    changePanelCurrentItem(state: Module1State, panelCurrentItem: MapItem | null) {
       state.panelCurrentItem = panelCurrentItem;
     }
   },

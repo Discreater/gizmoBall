@@ -20,7 +20,7 @@ class FileSystem {
   public static save(content: string, path: string) {
     fs.writeFile(path, content, err => {
       if (err) {
-        console.log(`save file error: ${err}`);
+        // console.log(`save file error: ${err}`);
       }
     })
   }

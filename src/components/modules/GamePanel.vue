@@ -1,13 +1,16 @@
 <template>
   <div class="game-panel">
-    <div ref="gameGrid" @drop="onDrop" @dragover.prevent="onDragover" @dragenter.prevent class="game-grid" style="backgroundImage: url(img/grid.png)">
-      <img v-for="(item, index) in items" :key="index" :src="item.imgURL" width="35px" height="35px" :style="`position: absolute;top:${item.position.y}px;left:${item.position.x}px`"/>
+    <div ref="gameGrid" @click="onPanelClick()" @drop="onDrop" @dragover.prevent="onDragover" @dragenter.prevent class="game-grid" style="backgroundImage: url(img/grid.png)">
+      <ItemImage v-for="(item, index) in items" :key="index" :item="item" :selected="currentItemId === item.id"
+        @click.native.stop="onImgClick(item)">
+      </ItemImage>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import ItemImage from "@/components/base/ItemImage.vue";
 import store from "@/store/index";
 import {
   ViewItem,
@@ -18,7 +21,11 @@ import {
 import { itemMap, MapItem } from '../../common/ts/model/mapitems/MapItems';
 import Controller from '../../common/ts/Controller';
 
-@Component
+@Component({
+  components: {
+    ItemImage
+  }
+})
 export default class GamePanel extends Vue {
 
   $refs!: {
@@ -27,6 +34,14 @@ export default class GamePanel extends Vue {
 
   items: MapItem[] = [];
 
+  get currentItemId(): number {
+    if (store.state.module1.panelCurrentItem) {
+      return store.state.module1.panelCurrentItem.id;
+    } else {
+      return 0;
+    }
+  }
+
   private gridX!: number;
   private gridY!: number;
 
@@ -34,6 +49,26 @@ export default class GamePanel extends Vue {
     const p = this.$refs.gameGrid.getBoundingClientRect()
     this.gridX = p.left
     this.gridY = p.top
+    setInterval(() => {
+      this.items = Controller.getInstance().items;
+    }, 100)
+  }
+
+  /**
+   * 点击空白区域
+   */
+  onPanelClick() {
+    store.commit.changePanelCurrentItem(null);
+  }
+
+  /**
+   * 点击图片（item）
+   */
+  onImgClick(item: MapItem) {
+    const m = store.state.module1;
+    if (m.toolZoneCurrentItem.typeValue === 'select' && m.currentMode === 'LAYOUT') {
+      store.commit.changePanelCurrentItem(item);
+    }
   }
 
   /**
@@ -54,7 +89,7 @@ export default class GamePanel extends Vue {
    * 处理从组件栏拖动到网格放下后的drop事件
    */
   onDrop(event: DragEvent) {
-    console.log('You dropped something!');
+    // console.log('You dropped something!');
     const item = store.state.module1.draggingItem;
     if (item === null || item.typeValue === 'select') {
       return
@@ -69,7 +104,7 @@ export default class GamePanel extends Vue {
 
     if (Controller.getInstance().createMapItem(item.typeValue, element.x, element.y)) {
       console.log(`--添加 ${item.typeValue} 成功`)
-      this.items = Controller.getInstance().items;
+      // this.items = Controller.getInstance().items;
     } else {
       console.log(`--添加 ${item.typeValue} 失败`);
     }

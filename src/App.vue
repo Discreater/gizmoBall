@@ -34,6 +34,7 @@ export default class HelloWorld extends Vue {
 body {
   background: var(--color-bg)
   color: var(--color-text)
+  user-select none
 }
 
 #app {
