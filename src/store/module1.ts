@@ -7,6 +7,7 @@ import { stat } from 'fs';
 export interface Module1State {
   useLightTheme: boolean,
   currentMode: 'LAYOUT' | 'PLAY',
+  currentState: 'PAUSE' | 'PLAYING',
   draggingItem: MapItem | ViewItem | null,
   draggingItemOffset: Vector2D,
   toolZoneCurrentItem: ViewItem,
@@ -17,6 +18,7 @@ export default {
   state: {
     useLightTheme: true,
     currentMode: 'LAYOUT',
+    currentState: 'PAUSE',
     draggingItem: null,
     draggingItemOffset: new Vector2D(0, 0),
     toolZoneCurrentItem: Gizmo.selectItem,
@@ -31,6 +33,9 @@ export default {
     },
     changeMode(state: Module1State, currentMode: 'LAYOUT' | 'PLAY') {
       state.currentMode = currentMode;
+    },
+    changeState(state: Module1State, currentState: 'PAUSE' | 'PLAYING') {
+      state.currentState = currentState;
     },
     changeDraggingItem(state: Module1State, draggingItem: MapItem | ViewItem | null) {
       state.draggingItem = draggingItem;

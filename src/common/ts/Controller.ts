@@ -4,7 +4,8 @@ import {
   isRotatable,
   Direction,
   isZoomable,
-  MapItemNames
+  MapItemNames,
+  IRotatable
 } from "./model/mapitems/MapItem"
 import FileSystem from "./fs/FileSystem"
 import { Vector2D, Angle } from './util/Vector';
@@ -18,6 +19,7 @@ import {
   BaffleMapItem
 } from './model/mapitems/Baffle';
 import { remote } from 'electron';
+import TSViews from '@/views/TSViews';
 
 abstract class MapItemJSON {
   abstract name: MapItemNames;
@@ -25,7 +27,7 @@ abstract class MapItemJSON {
   abstract zoom?: number;
   abstract rotation?: Direction;
   public static createFromJSON(obj: any): MapItemJSON | null {
-    if (obj.name && obj.position && obj.position.x && obj.position.y) {
+    if (obj.name && obj.position && obj.position.x !== undefined && obj.position.y !== undefined) {
       return {
         name: obj.name,
         position: new Vector2D(obj.position.x, obj.position.y),
@@ -50,14 +52,29 @@ export class Controller {
   /**
    * 当前打开的文件路径，若为空则表明未打开任何文件
    */
-  private currentOpenedFilePath: string | null = null;
+  private _currentOpenedFilePath: string | null = null;
+  private get currentOpenedFilePath(): string | null {
+    return this._currentOpenedFilePath;
+  }
+  private set currentOpenedFilePath(file: string | null) {
+    TSViews.changeTitle(file, this.currentFileModified);
+    this._currentOpenedFilePath = file;
+  }
 
   /**
    * 当前文件是否被修改
    */
-  private currentFileModified: boolean = false;
+  private _currentFileModified: boolean = false;
+  private get currentFileModified(): boolean {
+    return this._currentFileModified;
+  }
+  private set currentFileModified(newVal: boolean) {
+    TSViews.changeTitle(this.currentOpenedFilePath, newVal);
+    this._currentFileModified = newVal;
+  }
 
   private mapItems: Map<number, MapItem>;
+  private savedJSONString: string;
   private balls: Map<number, Ball>;
   private border: BorderMapItem;
   private alphaBaffles:Map<number, BaffleAlphaMapItem>;
@@ -69,6 +86,7 @@ export class Controller {
     this.mapItems.set(this.border.id, this.border);
     this.alphaBaffles = new Map<number, BaffleAlphaMapItem>();
     this.betaBaffles = new Map<number, BaffleBetaMapItem>();
+    this.savedJSONString = this.mapItemsToJSON(this.mapItems);
   }
 
   public get items():MapItem[] {
@@ -88,10 +106,13 @@ export class Controller {
    * @param y
    * @returns 是否成功
    */
-  public createMapItem(name: MapItemNames, x: number, y:number): boolean {
+  public createMapItem(name: MapItemNames, x: number, y:number): MapItem | null{
     const mapItem = new itemMap[name](x, y);
-    console.log(mapItem);
-    return this.handleAddItem(mapItem);
+    if (this.handleAddItem(mapItem)) {
+      this.savedJSONString = this.mapItemsToJSON(this.mapItems);
+      return mapItem
+    }
+    return null;
   }
 
   /**
@@ -111,12 +132,12 @@ export class Controller {
         (response, checkboxChecked) => {
           switch (response) {
             case 0:
-              this.save()
+              this.save().then(res => this.openFile())
               break
             case 1:
+              this.openFile();
               break
             case 2:
-              return
             default:
               break
           }
@@ -128,41 +149,63 @@ export class Controller {
   }
 
   private openFile() {
-    FileSystem.open((path, data) => {
-      let items = this.readFromJSON(data);
-      if (items != null) {
-        this.mapItems.clear();
-        this.currentOpenedFilePath = path;
-        for (let item of items) {
-          this.mapItems.set(item.id, item);
+    FileSystem.open()
+      .then(res => {
+        const data = res.data;
+        const path = res.filePath;
+        let items = this.readFromJSON(data);
+        if (items != null) {
+          this.loadMapItemsFromItems(items);
+          this.savedJSONString = data;
+          this.currentOpenedFilePath = path;
+          this.currentFileModified = false;
+        } else {
+          remote.dialog.showMessageBox(
+            remote.getCurrentWindow(),
+            {
+              type: 'error',
+              buttons: [],
+              message: '文件已损坏'
+            }
+          )
         }
-      } else {
-        remote.dialog.showMessageBox(
-          remote.getCurrentWindow(),
-          {
-            type: 'error',
-            buttons: [],
-            message: '文件已损坏'
-          }
-        )
+      })
+  }
+
+  private loadMapItemsFromItems(items: MapItem[]) {
+    this.clearAll();
+    for (let item of items) {
+      if (item instanceof Ball) {
+        this.balls.set(item.id, item);
+      } else if (item instanceof BaffleAlphaMapItem) {
+        this.alphaBaffles.set(item.id, item);
+      } else if (item instanceof BaffleBetaMapItem) {
+        this.betaBaffles.set(item.id, item);
       }
-    })
+      this.mapItems.set(item.id, item);
+    }
+  }
+
+  private loadMapItemsFromJSON(content: string) {
+    let items = this.readFromJSON(content);
+    if (items != null) {
+      this.loadMapItemsFromItems(items);
+    } else {
+      throw new Error('内部读取错误');
+    }
   }
 
   private readFromJSON(content: string): MapItem[] | null {
-    console.log(content);
     const jsonItems = JSON.parse(content);
     let items: MapItem[] = [];
     if (jsonItems instanceof Array) {
       for (let jsonItem of jsonItems) {
-        console.log(jsonItem);
         const item = MapItemJSON.createFromJSON(jsonItem);
         if (item !== null) {
-          console.log('is MapItemsJSON');
           const mapItem = new itemMap[item.name](item.position.x, item.position.y);
           // 检测是否旋转
           if (isRotatable(mapItem)) {
-            if (item.rotation) {
+            if (item.rotation !== undefined) {
               mapItem.rotation = item.rotation;
             } else {
               return null;
@@ -170,7 +213,7 @@ export class Controller {
           }
           // 检测是否放缩
           if (isZoomable(mapItem)) {
-            if (item.zoom) {
+            if (item.zoom !== undefined) {
               mapItem.zoomTo(mapItem.position, item.zoom);
             } else {
               return null;
@@ -195,22 +238,36 @@ export class Controller {
 
   /**
    * 保存文件
+   * @returns 回调参数为选择的文件名，若直接保存，则为空字符串
    */
-  public save() {
+  public save(): Promise<any> {
+    const content = this.savedJSONString;
     if (!this.currentOpenedFilePath) {
-      this.saveAs();
+      return FileSystem.saveAs(content).then(res => {
+        this.currentFileModified = false;
+        this.currentOpenedFilePath = res;
+        return res;
+      });
     } else {
-      const content = this.mapItemsToJSON(this.mapItems);
-      FileSystem.save(content, this.currentOpenedFilePath);
+      return FileSystem.save(content, this.currentOpenedFilePath).then(res => this.currentFileModified = false);
     }
   }
 
   /**
    * 另存为文件
+   * @returns 回调参数为选择的文件名
    */
-  public saveAs() {
-    const content = this.mapItemsToJSON(this.mapItems);
-    FileSystem.saveAs(content);
+  public saveAs(): Promise<string> {
+    const content = this.savedJSONString
+    let result = FileSystem.saveAs(content);
+    if (this.currentOpenedFilePath === null) {
+      result = result.then(res => {
+        this.currentOpenedFilePath = res;
+        this.currentFileModified = false;
+        return res;
+      })
+    }
+    return result;
   }
 
   private collidesWithOthers(mapItem:MapItem):boolean {
@@ -240,6 +297,7 @@ export class Controller {
     } else if (mapitem instanceof BaffleBetaMapItem) {
       this.betaBaffles.set(mapitem.id, mapitem);
     }
+    this.currentFileModified = true;
     return true;
   }
 
@@ -257,6 +315,8 @@ export class Controller {
         mapItem.translate(oldPosition);
         return false;
       }
+      this.currentFileModified = true;
+      this.savedJSONString = this.mapItemsToJSON(this.mapItems);
       return true;
     }
     return false;
@@ -270,7 +330,25 @@ export class Controller {
     this.balls.delete(id);
     this.alphaBaffles.delete(id);
     this.betaBaffles.delete(id);
-    return this.mapItems.delete(id);
+    const result = this.mapItems.delete(id);
+    if (result) this.currentFileModified = true;
+    this.savedJSONString = this.mapItemsToJSON(this.mapItems);
+    return result;
+  }
+
+  /**
+   * 吸收球处理
+   * @param id 球ID
+   */
+  public handleAbsorb(id:number):boolean {
+    const ball:MapItem | undefined = this.mapItems.get(id);
+    if (ball !== undefined && ball instanceof Ball) {
+      this.balls.delete(id);
+      this.mapItems.delete(id);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -286,6 +364,8 @@ export class Controller {
         mapItem.zoomTo(mapItem.position, zoom);
         return false;
       }
+      this.currentFileModified = true;
+      this.savedJSONString = this.mapItemsToJSON(this.mapItems);
       return true;
     }
     return false;
@@ -307,6 +387,8 @@ export class Controller {
         mapItem.zoomTo(mapItem.position, zoom);
         return false;
       }
+      this.currentFileModified = true;
+      this.savedJSONString = this.mapItemsToJSON(this.mapItems);
       return true;
     }
     return false;
@@ -320,76 +402,52 @@ export class Controller {
     let mapItem:MapItem | undefined = this.mapItems.get(id);
     if (mapItem !== undefined && isRotatable(mapItem)) {
       mapItem.rotate(mapItem.center, Angle.RIGHT_ANGLE);
-      console.log(this.mapItems);
       if (this.collidesWithOthers(mapItem)) {
         mapItem.rotate(mapItem.center, Angle.RIGHT_ANGLE_REVERSE);
         return false;
       }
+      this.currentFileModified = true;
+      this.savedJSONString = this.mapItemsToJSON(this.mapItems);
       return true;
     }
     return false;
   }
 
-  private isPlaying:boolean = false;
+  private state:'LAYOUT' | 'PAUSED' | 'PLAYING' = "LAYOUT";
 
   /**
    * 开始游玩模式
    */
   public startPlaying():void {
-    // todo
-
+    this.state = 'PLAYING';
     for (let kv of this.balls) {
       const ball:Ball = kv[1];
       ball.massPoint.setAcceleration('gravity', Physical.gravity);
       ball.massPoint.setAcceleration('pipe', new Vector2D(0, 0));
       ball.massPoint.setAcceleration('centripetal', new Vector2D(0, 0));
     }
-    this.isPlaying = true;
     const timer:NodeJS.Timeout = setInterval(() => {
-      if (this.isPlaying) {
-        for (let [, ball] of this.balls) {
-          // console.log(Physical.gravity);
-          // console.log(ball.massPoint.v);
-          ball.massPoint.tick();
-
-          // old implementation of border detect
-
-          // const center:Vector2D = ball.center;
-          // const x:number = center.x,
-          //   y:number = center.y;
-          // const r:number = MapItem.gridScale * 0.5;
-          // const v:Vector2D = ball.massPoint.v;
-          // const m:number = Controller.maxXY;
-          // const delta:number = 0;
-          // if (x + r > m) {
-          //   ball.massPoint.setVelocity(new Vector2D(-Math.abs(v.x), v.y));
-          //   ball.massPoint.translate(new Vector2D(m - r - delta, y));
-          // }
-          // if (x - r < 0) {
-          //   ball.massPoint.setVelocity(new Vector2D(Math.abs(v.x), v.y));
-          //   ball.massPoint.translate(new Vector2D(delta + r, y));
-          // }
-          // if (y + r > m) {
-          //   ball.massPoint.setVelocity(new Vector2D(v.x, -Math.abs(v.y)));
-          //   ball.massPoint.translate(new Vector2D(x, m - r - delta));
-          // }
-          // if (y - r < 0) {
-          //   ball.massPoint.setVelocity(new Vector2D(v.x, Math.abs(v.y)));
-          //   ball.massPoint.translate(new Vector2D(x, delta + r));
-          // }
-          ball.translate(Vector2D.difference(ball.position, ball.center).add(ball.massPoint.p));
-          for (let [, item] of this.mapItems) {
-            if (item.id != ball.id) {
-              // console.log("detecting...");
-              if (item.crashDetect(ball)) {
-                // console.log("detected!")
-                item.crashHandle(ball);
+      switch (this.state) {
+        case "PLAYING":
+          for (let [, ball] of this.balls) {
+            ball.massPoint.tick();
+            ball.translate(Vector2D.difference(ball.position, ball.center).add(ball.massPoint.p));
+            for (let [, item] of this.mapItems) {
+              if (item.id != ball.id) {
+                if (item.crashDetect(ball)) {
+                  item.crashHandle(ball);
+                }
               }
             }
           }
-        }
-      } else {
-        clearInterval(timer);
+          break;
+        case "PAUSED":
+          break;
+        case "LAYOUT":
+          clearInterval(timer);
+          break;
+        default:
+          break;
       }
     }, 1);
   }
@@ -399,7 +457,19 @@ export class Controller {
    */
   public stopPlaying():void {
     // todo
-    this.isPlaying = false;
+    this.state = 'LAYOUT';
+    this.mapItems.clear();
+    this.mapItems.set(this.border.id, this.border);
+    // TODO: 从JSON读取
+    this.loadMapItemsFromJSON(this.savedJSONString);
+  }
+
+  public pause(): void {
+    this.state = 'PAUSED';
+  }
+
+  public continue(): void {
+    this.state = 'PLAYING';
   }
 
   /**
@@ -407,8 +477,8 @@ export class Controller {
    */
   private mapItemsToJSON(mapItems: Map<number, MapItem>): string {
     let mapItemJSONs: MapItemJSON[] = [];
-    for (let item of mapItems) {
-      const mapItem:MapItem = item[1];
+    for (let [, item] of mapItems) {
+      const mapItem:MapItem = item;
       const mapItemJSON: MapItemJSON = {
         name: mapItem.name,
         position: mapItem.position,
@@ -419,6 +489,14 @@ export class Controller {
     }
     return JSON.stringify(mapItemJSONs);
   }
+
+  private clearAll() {
+    this.balls.clear();
+    this.alphaBaffles.clear();
+    this.betaBaffles.clear();
+    this.mapItems.clear();
+  }
+
 
   public handleBaffleMove(name:MapItemNames, direction:"left"|"right") {
     const movement:Vector2D = Vector2D.ZERO;

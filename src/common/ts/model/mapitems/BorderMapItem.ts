@@ -52,10 +52,7 @@ export class BorderCollider extends Collider {
   public crashDetect(crashable: ICollisible): boolean {
     for (let border of this.borders) {
       if (border.crashDetect(crashable) || crashable.crashDetect(border)) {
-        console.log(border)
         return true;
-      } else {
-        console.log(border)
       }
     }
     return false;

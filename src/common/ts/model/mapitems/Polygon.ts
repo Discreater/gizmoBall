@@ -197,7 +197,6 @@ export class PolygonCollider extends Collider {
         const axis:Vector2D = refletLine.normalVector;
         Physical.surfaceVelocityReflect(crashable.massPoint, axis);
       } else {
-        console.log("point reflect!");
         const closestPoint:Vector2D = PolygonCollider.getPolygonPointClosestToCircle(this, crashable);
         Physical.surfaceVelocityReflect(crashable.massPoint, Vector2D.difference(crashable.center, closestPoint));
       }

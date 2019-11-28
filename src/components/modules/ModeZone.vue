@@ -6,7 +6,7 @@
         <td class="mode-col" align="right">
           <img v-if="currentMode === 'LAYOUT'" src="img/mode/arrow.png" height="20">
         </td>
-        <td align="left">
+        <td align="left" colspan="2">
           <button @click="changeToLayoutMode" class="layout-button">布局模式</button>
         </td>
       </tr>
@@ -16,6 +16,9 @@
         </td>
         <td align="left">
           <button @click="changeToPlayMode" class="play-button">游玩模式</button>
+        </td>
+        <td>
+          <img @click="changeState" v-if="currentMode === 'PLAY'" :src="controllImg" height='30' class="controll-img">
         </td>
       </tr>
     </table>
@@ -32,6 +35,24 @@ export default class ModeZone extends Vue {
 
   get currentMode() {
     return store.state.module1.currentMode;
+  }
+
+  get controllImg(): string {
+    if (store.state.module1.currentState === 'PLAYING') {
+      return 'img/mode/pause.png'
+    } else {
+      return 'img/mode/continue.png'
+    }
+  }
+
+  private changeState() {
+    if (store.state.module1.currentState === 'PLAYING') {
+      store.commit.changeState('PAUSE');
+      Controller.getInstance().pause();
+    } else {
+      store.commit.changeState('PLAYING');
+      Controller.getInstance().continue();
+    }
   }
 
   private changeToLayoutMode() {
@@ -62,6 +83,9 @@ export default class ModeZone extends Vue {
       margin-bottom 15px
       border-radius 10px
       width 111px
+    }
+    .controll-img {
+      margin-right 30px
     }
   }
   span{

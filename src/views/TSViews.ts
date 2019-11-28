@@ -28,13 +28,11 @@ class TSViews {
     ]
   )
 
-  public static changeTitle(title: string | null) {
+  public static changeTitle(file: string | null, modified: boolean = false) {
+    const f: string = (file === null) ? '' : `${file}-`;
+    const m: string = modified ? '*' : '';
     const appName: string = 'gizmoball';
-    if (title === null || title === '') {
-      this.titlebar.updateTitle(appName);
-    } else {
-      this.titlebar.updateTitle(`${title}-${appName}`);
-    }
+    this.titlebar.updateTitle(f + m + appName);
   }
 
   /**
@@ -43,7 +41,6 @@ class TSViews {
   public static bindKey() {
     window.onkeydown = (e: KeyboardEvent) => {
       const k = e.key;
-      console.log(k);
       if (this.keyMap.has(k)) {
         this.keyMap.set(k, true);
       }

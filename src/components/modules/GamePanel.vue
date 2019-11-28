@@ -91,8 +91,6 @@ export default class GamePanel extends Vue {
    */
   onDrop(event: DragEvent) {
     // console.log('You dropped something!');
-    console.log("drop");
-    console.log(event);
     const item = store.state.module1.draggingItem;
     if (item === null) {
       return
@@ -101,7 +99,10 @@ export default class GamePanel extends Vue {
     const position = new Vector2D(event.clientX - this.gridX - offset.x, event.clientY - this.gridY - offset.y);
     if (isViewItem(item) && item.typeValue !== 'select') {
       this.formatPosition(position, 'floor');
-      Controller.getInstance().createMapItem(item.typeValue, position.x, position.y)
+      const mapItem = Controller.getInstance().createMapItem(item.typeValue, position.x, position.y);
+      if (mapItem != null) {
+        store.commit.changePanelCurrentItem(mapItem);
+      }
     } else if (item instanceof MapItem) {
       this.formatPosition(position, 'round')
       Controller.getInstance().handleDraggingItem(item.id, position);

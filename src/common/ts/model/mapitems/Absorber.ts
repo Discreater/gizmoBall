@@ -19,7 +19,7 @@ export class AbsorberMapItem extends PolygonMapItem {
   }
   public crashHandle(ball:ICollisible):void {
     if (ball instanceof Ball) {
-      Controller.getInstance().handleDeleteItem(ball.id);
+      Controller.getInstance().handleAbsorb(ball.id);
     }
   }
 }
