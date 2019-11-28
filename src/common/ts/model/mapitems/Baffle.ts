@@ -33,6 +33,11 @@ export abstract class BaffleMapItem extends MapItem {
   constructor(x:number, y:number) {
     super(new BaffleCollider(new Vector2D(x, y)));
   }
+
+  public move(offset:Vector2D):BaffleMapItem {
+    this.translate(this.position.add(offset));
+    return this;
+  }
 }
 
 export class BaffleAlphaMapItem extends BaffleMapItem {

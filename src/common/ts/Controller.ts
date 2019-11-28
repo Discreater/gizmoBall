@@ -11,6 +11,13 @@ import { Vector2D, Angle } from './util/Vector';
 import store from "../../store/index"
 import { Ball, itemMap, TriangleMapItem } from './model/mapitems/MapItems';
 import { Physical } from './model/Physical';
+import { BorderMapItem } from './model/mapitems/BorderMapItem';
+import {
+  BaffleAlphaMapItem,
+  BaffleBetaMapItem,
+  BaffleMapItem
+} from './model/mapitems/Baffle';
+import { remote } from 'electron';
 
 abstract class MapItemJSON {
   abstract name: MapItemNames;
@@ -43,18 +50,33 @@ export class Controller {
   /**
    * 当前打开的文件路径，若为空则表明未打开任何文件
    */
-  private currentOpendFilePath: string | null = null;
+  private currentOpenedFilePath: string | null = null;
+
+  /**
+   * 当前文件是否被修改
+   */
+  private currentFileModified: boolean = false;
+
   private mapItems: Map<number, MapItem>;
   private balls: Map<number, Ball>;
+  private border: BorderMapItem;
+  private alphaBaffles:Map<number, BaffleAlphaMapItem>;
+  private betaBaffles:Map<number, BaffleBetaMapItem>;
   private constructor() {
     this.mapItems = new Map<number, MapItem>();
     this.balls = new Map<number, Ball>();
+    this.border = new BorderMapItem();
+    this.mapItems.set(this.border.id, this.border);
+    this.alphaBaffles = new Map<number, BaffleAlphaMapItem>();
+    this.betaBaffles = new Map<number, BaffleBetaMapItem>();
   }
 
   public get items():MapItem[] {
     let mapItem :MapItem[] = [];
-    for (let i of this.mapItems) {
-      mapItem.push(i[1]);
+    for (let [, item] of this.mapItems) {
+      if (!(item instanceof BorderMapItem)) {
+        mapItem.push(item);
+      }
     }
     return mapItem;
   }
@@ -76,14 +98,53 @@ export class Controller {
    * 打开文件
    */
   public open() {
+    if (this.currentFileModified) {
+      remote.dialog.showMessageBox(
+        remote.getCurrentWindow(),
+        {
+          type: 'question',
+          buttons: ['保存', '不保存', '取消'],
+          message: '当前文件为保存，是否保存?',
+          defaultId: 0,
+          cancelId: 2
+        },
+        (response, checkboxChecked) => {
+          switch (response) {
+            case 0:
+              this.save()
+              break
+            case 1:
+              break
+            case 2:
+              return
+            default:
+              break
+          }
+        }
+      )
+    } else {
+      this.openFile();
+    }
+  }
+
+  private openFile() {
     FileSystem.open((path, data) => {
       let items = this.readFromJSON(data);
       if (items != null) {
         this.mapItems.clear();
-        this.currentOpendFilePath = path;
+        this.currentOpenedFilePath = path;
         for (let item of items) {
           this.mapItems.set(item.id, item);
         }
+      } else {
+        remote.dialog.showMessageBox(
+          remote.getCurrentWindow(),
+          {
+            type: 'error',
+            buttons: [],
+            message: '文件已损坏'
+          }
+        )
       }
     })
   }
@@ -136,11 +197,11 @@ export class Controller {
    * 保存文件
    */
   public save() {
-    if (!this.currentOpendFilePath) {
+    if (!this.currentOpenedFilePath) {
       this.saveAs();
     } else {
       const content = this.mapItemsToJSON(this.mapItems);
-      FileSystem.save(content, this.currentOpendFilePath);
+      FileSystem.save(content, this.currentOpenedFilePath);
     }
   }
 
@@ -174,6 +235,10 @@ export class Controller {
     this.mapItems.set(mapitem.id, mapitem);
     if (mapitem instanceof Ball) {
       this.balls.set(mapitem.id, mapitem);
+    } else if (mapitem instanceof BaffleAlphaMapItem) {
+      this.alphaBaffles.set(mapitem.id, mapitem);
+    } else if (mapitem instanceof BaffleBetaMapItem) {
+      this.betaBaffles.set(mapitem.id, mapitem);
     }
     return true;
   }
@@ -202,9 +267,9 @@ export class Controller {
    * @param id 元件ID
    */
   public handleDeleteItem(id:number):boolean {
-    if (this.mapItems.get(id) instanceof Ball) {
-      this.balls.delete(id);
-    }
+    this.balls.delete(id);
+    this.alphaBaffles.delete(id);
+    this.betaBaffles.delete(id);
     return this.mapItems.delete(id);
   }
 
@@ -275,7 +340,9 @@ export class Controller {
 
     for (let kv of this.balls) {
       const ball:Ball = kv[1];
-      ball.massPoint.setAcceleration(Physical.gravity);
+      ball.massPoint.setAcceleration('gravity', Physical.gravity);
+      ball.massPoint.setAcceleration('pipe', new Vector2D(0, 0));
+      ball.massPoint.setAcceleration('centripetal', new Vector2D(0, 0));
     }
     this.isPlaying = true;
     const timer:NodeJS.Timeout = setInterval(() => {
@@ -284,29 +351,32 @@ export class Controller {
           // console.log(Physical.gravity);
           // console.log(ball.massPoint.v);
           ball.massPoint.tick();
-          const center:Vector2D = ball.center;
-          const x:number = center.x,
-            y:number = center.y;
-          const r:number = MapItem.gridScale * 0.5;
-          const v:Vector2D = ball.massPoint.v;
-          const m:number = Controller.maxXY;
-          const delta:number = 0;
-          if (x + r > m) {
-            ball.massPoint.setVelocity(new Vector2D(-Math.abs(v.x), v.y));
-            ball.massPoint.translate(new Vector2D(m - r - delta, y));
-          }
-          if (x - r < 0) {
-            ball.massPoint.setVelocity(new Vector2D(Math.abs(v.x), v.y));
-            ball.massPoint.translate(new Vector2D(delta + r, y));
-          }
-          if (y + r > m) {
-            ball.massPoint.setVelocity(new Vector2D(v.x, -Math.abs(v.y)));
-            ball.massPoint.translate(new Vector2D(x, m - r - delta));
-          }
-          if (y - r < 0) {
-            ball.massPoint.setVelocity(new Vector2D(v.x, Math.abs(v.y)));
-            ball.massPoint.translate(new Vector2D(x, delta + r));
-          }
+
+          // old implementation of border detect
+
+          // const center:Vector2D = ball.center;
+          // const x:number = center.x,
+          //   y:number = center.y;
+          // const r:number = MapItem.gridScale * 0.5;
+          // const v:Vector2D = ball.massPoint.v;
+          // const m:number = Controller.maxXY;
+          // const delta:number = 0;
+          // if (x + r > m) {
+          //   ball.massPoint.setVelocity(new Vector2D(-Math.abs(v.x), v.y));
+          //   ball.massPoint.translate(new Vector2D(m - r - delta, y));
+          // }
+          // if (x - r < 0) {
+          //   ball.massPoint.setVelocity(new Vector2D(Math.abs(v.x), v.y));
+          //   ball.massPoint.translate(new Vector2D(delta + r, y));
+          // }
+          // if (y + r > m) {
+          //   ball.massPoint.setVelocity(new Vector2D(v.x, -Math.abs(v.y)));
+          //   ball.massPoint.translate(new Vector2D(x, m - r - delta));
+          // }
+          // if (y - r < 0) {
+          //   ball.massPoint.setVelocity(new Vector2D(v.x, Math.abs(v.y)));
+          //   ball.massPoint.translate(new Vector2D(x, delta + r));
+          // }
           ball.translate(Vector2D.difference(ball.position, ball.center).add(ball.massPoint.p));
           for (let [, item] of this.mapItems) {
             if (item.id != ball.id) {
@@ -348,6 +418,40 @@ export class Controller {
       mapItemJSONs.push(mapItemJSON);
     }
     return JSON.stringify(mapItemJSONs);
+  }
+
+  public handleBaffleMove(name:MapItemNames, direction:"left"|"right") {
+    const movement:Vector2D = Vector2D.ZERO;
+    switch (direction) {
+      case "left":
+        movement.x = -5;
+        break;
+      case "right":
+        movement.x = 5;
+        break;
+      default:
+        break;
+    }
+    switch (name) {
+      case 'baffle-alpha':
+        for (let [, baffle] of this.alphaBaffles) {
+          baffle.move(movement);
+          if (this.collidesWithOthers(baffle)) {
+            baffle.move(Vector2D.negate(movement));
+          }
+        }
+        break;
+      case 'baffle-beta':
+        for (let [, baffle] of this.betaBaffles) {
+          baffle.move(movement);
+          if (this.collidesWithOthers(baffle)) {
+            baffle.move(Vector2D.negate(movement));
+          }
+        }
+        break;
+      default:
+        break;
+    }
   }
 }
 

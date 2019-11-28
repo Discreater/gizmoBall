@@ -8,6 +8,8 @@ import {
   MenuItemConstructorOptions
 } from 'electron';
 import Controller from "@/common/ts/Controller"
+import { MapItemNames } from '@/common/ts/model/mapitems/MapItem';
+
 
 class TSViews {
 
@@ -16,6 +18,59 @@ class TSViews {
   public static readonly dark: Color = new Color(new RGBA(60, 60, 60));
 
   private static useLightTheme: boolean;
+
+  public static keyMap: Map<string, boolean> = new Map<string, boolean>(
+    [
+      ['a', false],
+      ['d', false],
+      ['ArrowRight', false],
+      ['ArrowLeft', false]
+    ]
+  )
+
+  public static changeTitle(title: string | null) {
+    const appName: string = 'gizmoball';
+    if (title === null || title === '') {
+      this.titlebar.updateTitle(appName);
+    } else {
+      this.titlebar.updateTitle(`${title}-${appName}`);
+    }
+  }
+
+  /**
+   * 绑定按键
+   */
+  public static bindKey() {
+    window.onkeydown = (e: KeyboardEvent) => {
+      const k = e.key;
+      console.log(k);
+      if (this.keyMap.has(k)) {
+        this.keyMap.set(k, true);
+      }
+    }
+    window.onkeyup = (e: KeyboardEvent) => {
+      const k = e.key;
+      if (this.keyMap.has(k)) {
+        this.keyMap.set(k, false);
+      }
+    }
+    const controller = Controller.getInstance();
+
+    setInterval(() => {
+      if (this.keyMap.get('a')) {
+        controller.handleBaffleMove('baffle-alpha', 'left');
+      }
+      if (this.keyMap.get('d')) {
+        controller.handleBaffleMove('baffle-alpha', 'right');
+      }
+      if (this.keyMap.get('ArrowRight')) {
+        controller.handleBaffleMove('baffle-beta', 'right');
+      }
+      if (this.keyMap.get('ArrowLeft')) {
+        controller.handleBaffleMove('baffle-beta', 'left');
+      }
+    }, 10)
+  }
 
   /**
    * 创建标题栏，包括菜单栏
@@ -169,6 +224,7 @@ class TSViews {
     // 放入标题栏
     this.titlebar.updateMenu(customMenu);
   }
+
 }
 
 export default TSViews;

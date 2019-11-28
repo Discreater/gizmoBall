@@ -1,9 +1,20 @@
 import { Vector2D } from "../util/Vector";
 
-export class Physical {
-  public static readonly gravity:Vector2D = new Vector2D(0, 15);
-  public static readonly tick:number = 0.025;
+/**
+ * `gravity` 重力加速度
+ *
+ * `pipe` 管道加速度
+ *
+ * `centripetal` 向心加速度
+ */
+type AccelerationType = 'gravity' | 'pipe' | 'centripetal'
 
+export class Physical {
+  public static get gravity():Vector2D {
+    return new Vector2D(0, 15);
+  }
+  public static readonly tick:number = 0.025;
+  public static readonly pipeAcc:Vector2D = Vector2D.negate(Physical.gravity);
 
   /**
    * 表面反弹
@@ -13,6 +24,7 @@ export class Physical {
   public static surfaceVelocityReflect(massPoint:MassPoint, axis:Vector2D):void {
     const v:Vector2D = massPoint.v;
     if (v.dot(axis) < 0) {
+      massPoint.move(-Physical.tick);
       massPoint.setVelocity(massPoint.v.reflet(axis));
     }
   }
@@ -35,16 +47,28 @@ export class Physical {
       m2.setVelocity(newV2);
     }
   }
+
+  public static centripetalAcceleration(massPoint:MassPoint, radius:number, center:Vector2D):Vector2D {
+    const v:Vector2D = massPoint.v;
+    const value:number = v.dot(v) / radius;
+    return Vector2D.difference(center, massPoint.p).unitVector.mult(value);
+  }
 }
 
 export class MassPoint {
   private _p: Vector2D;
   private _v: Vector2D;
   private _a: Vector2D;
+  private _accRecord: Map<AccelerationType, Vector2D>;
   constructor() {
     this._a = new Vector2D(0, 0);
     this._v = new Vector2D(0, 0);
     this._p = new Vector2D(0, 0);
+    this._accRecord = new Map<AccelerationType, Vector2D>([
+      ['gravity', Physical.gravity],
+      ['centripetal', new Vector2D(0, 0)],
+      ['pipe', new Vector2D(0, 0)]
+    ]);
   }
   get p():Vector2D {
     return Vector2D.copy(this._p);
@@ -55,6 +79,7 @@ export class MassPoint {
   get a():Vector2D {
     return Vector2D.copy(this._a);
   }
+
   public tick():void {
     this.changeVelocity();
     this.move();
@@ -108,22 +133,34 @@ export class MassPoint {
     return this;
   }
 
+  // /**
+  //  * 增加加速度
+  //  * @param a 加速度
+  //  */
+  // public addAcceleration(a: Vector2D):MassPoint {
+  //   this._a.add(a);
+  //   return this;
+  // }
+
   /**
-   * 增加加速度
-   * @param a 加速度
+   * 设置指定类型的加速度
+   * @param accType 加速度类型
+   * @param a 加速度值
    */
-  public addAcceleration(a: Vector2D):MassPoint {
-    this._a.add(a);
+  public setAcceleration(accType: AccelerationType, a: Vector2D): MassPoint {
+    this._accRecord.set(accType, a);
+    let v = Vector2D.sum(this._accRecord);
+    this._a = v;
     return this;
   }
 
-  /**
-   * 设置加速度
-   * @param a 加速度
-   */
-  public setAcceleration(a: Vector2D):MassPoint {
-    this._a.as(a);
-    return this;
-  }
+  // /**
+  //  * 设置加速度
+  //  * @param a 加速度
+  //  */
+  // public setAccelerationT(a: Vector2D):MassPoint {
+  //   this._a.as(a);
+  //   return this;
+  // }
 
 }

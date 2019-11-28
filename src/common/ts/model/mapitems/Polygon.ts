@@ -151,7 +151,7 @@ export class PolygonCollider extends Collider {
 
   public static getPolygonPointClosestToCircle(
     polygon: PolygonCollider,
-    circle: CircleCollider
+    circle: CircleCollider | Ball
   ):Vector2D {
     let min:number = 100000;
     let vertexes:Vector2D[] = polygon.vertexes;
@@ -166,30 +166,49 @@ export class PolygonCollider extends Collider {
     return closestPoint;
   }
 
+  public static outPointProjectionOnEdge(edge:Line, point:Vector2D):boolean {
+    const v1:Vector2D = Vector2D.difference(point, edge.p1),
+      v2:Vector2D = Vector2D.difference(point, edge.p2),
+      axis:Vector2D = edge.normalVector;
+    if (v1.dot(axis) <= 0 || v2.dot(axis) <= 0) {
+      // 点不在法向量一侧
+      return false;
+    } else {
+      const borderAxis1:Vector2D = Vector2D.difference(edge.p2, edge.p1),
+        borderAxis2:Vector2D = Vector2D.negate(borderAxis1);
+      // 判断点是否在两条直线中间
+      return borderAxis1.dot(v1) >= 0 && borderAxis2.dot(v2) >= 0;
+    }
+  }
+
   public crashHandle(crashable: ICollisible): void {
     if (crashable instanceof Ball) {
       let refletLine: Line | null = null;
       let ballPos:Vector2D = crashable.massPoint.p.add(crashable.massPoint.v.mult(-Physical.tick));
       for (let value of this._edges) {
-        const v1:Vector2D = Vector2D.difference(ballPos, value.p1);
-        const v2:Vector2D = Vector2D.difference(ballPos, value.p2);
         if (refletLine === null) {
-          const axis:Vector2D = value.normalVector;
-          if (v1.dot(axis) >= 0 && v2.dot(axis) >= 0) {
+          if (PolygonCollider.outPointProjectionOnEdge(value, ballPos)) {
             refletLine = value;
             break;
           }
         }
       }
-      if (refletLine instanceof Line) {
+      if (refletLine !== null) {
         const axis:Vector2D = refletLine.normalVector;
         Physical.surfaceVelocityReflect(crashable.massPoint, axis);
+      } else {
+        console.log("point reflect!");
+        const closestPoint:Vector2D = PolygonCollider.getPolygonPointClosestToCircle(this, crashable);
+        Physical.surfaceVelocityReflect(crashable.massPoint, Vector2D.difference(crashable.center, closestPoint));
       }
     }
   }
 }
 
 export abstract class PolygonMapItem extends MapItem implements IRotatable, IZoomable {
+  constructor(protected collider:PolygonCollider) {
+    super(collider);
+  }
   get zoom(): number {
     return this.collider.zoom;
   }

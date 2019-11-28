@@ -90,7 +90,8 @@ export namespace Gizmo {
     'pipe-turned': pipeTurnedItem,
     'select': selectItem,
     'square': squareItem,
-    'triangle': triangleItem
+    'triangle': triangleItem,
+    'border': selectItem
   }
   export function getViewItemByType(typeValue: ItemType): ViewItem {
     return itemMap[typeValue];

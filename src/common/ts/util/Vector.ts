@@ -58,7 +58,7 @@ export class Vector2D {
 
 
   /**
-   * 自身法向量,返回新向量,在向量右侧:原↖法↗
+   * 自身法向量,返回新向量,在向量左侧:法↖原↗
    */
   get normalVector():Vector2D {
     return Vector2D.normalVector(this);
@@ -100,6 +100,14 @@ export class Vector2D {
   }
 
   /**
+   * 自身旋转到与direction一致的方向，返回自身
+   * @param direction 目标方向向量
+   */
+  public directionRotate(direction:Vector2D):Vector2D {
+    return this.as(direction.clone().mult(this.radius / direction.radius));
+  }
+
+  /**
    * 自身在axis向量为法线的平面进行反射,返回自身
    * @param axis 反射面法线
    */
@@ -119,6 +127,13 @@ export class Vector2D {
    */
   public static difference(v1:Vector2D, v2:Vector2D):Vector2D {
     return new Vector2D(v1.x - v2.x, v1.y - v2.y);
+  }
+
+  /**
+   * 向量取反
+   */
+  public static negate(v: Vector2D): Vector2D {
+    return new Vector2D(-v.x, -v.y);
   }
 
   /**
@@ -195,7 +210,7 @@ export class Vector2D {
   }
 
   /**
-   * 法向量计算,在向量右侧:原↖法↗
+   * 法向量计算,在向量左侧:法↖原↗
    */
   public static normalVector(v:Vector2D):Vector2D {
     return new Vector2D(v.y, -v.x);
@@ -237,7 +252,11 @@ export class Vector2D {
     return v.component(axis).mult(-2).add(v);
   }
 
-  public static sum(vectors:Vector2D[]):Vector2D {
+  /**
+   * 向量求和
+   * @param vectors 向量迭代器
+   */
+  public static sum(vectors:Vector2D[] | Map<any, Vector2D>):Vector2D {
     let sum:Vector2D = Vector2D.ZERO;
     vectors.forEach((vertex:Vector2D):void => {
       sum.add(vertex);
@@ -245,6 +264,10 @@ export class Vector2D {
     return sum;
   }
 
+  /**
+   * 重心
+   * @param polygon 多边形
+   */
   public static center(polygon:Vector2D[]):Vector2D {
     return Vector2D.sum(polygon).mult(1 / polygon.length);
   }

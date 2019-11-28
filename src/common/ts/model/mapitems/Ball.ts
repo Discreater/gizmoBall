@@ -16,7 +16,7 @@ export class Ball extends MapItem {
     return this.collider.center;
   }
   public massPoint:MassPoint;
-
+  public pipeID:number = -1;
   public crashHandle(crashable:ICollisible):void {
     if (crashable instanceof Ball) {
       Physical.perfectElasticCollision(this.massPoint, crashable.massPoint);

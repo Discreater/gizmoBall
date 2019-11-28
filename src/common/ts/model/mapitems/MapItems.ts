@@ -12,6 +12,7 @@ import {
 } from './Baffle';
 import { PipeMapItem } from './Pipe';
 import { PipeTurnedMapItem } from './PipeTurned';
+import { BorderMapItem } from './BorderMapItem';
 
 export * from "./Absorber";
 export * from "./Ball";
@@ -29,6 +30,7 @@ export type MapItems =
   typeof BaffleAlphaMapItem |
   typeof BaffleBetaMapItem |
   typeof Ball |
+  typeof BorderMapItem |
   typeof CircleMapItem |
   typeof PipeMapItem |
   typeof PipeTurnedMapItem |
@@ -41,6 +43,7 @@ const itemMap: Record<MapItemNames, MapItems> = {
   "baffle-alpha": BaffleAlphaMapItem,
   "baffle-beta": BaffleBetaMapItem,
   ball: Ball,
+  border: BorderMapItem,
   circle: CircleMapItem,
   pipe: PipeMapItem,
   "pipe-turned": PipeTurnedMapItem,

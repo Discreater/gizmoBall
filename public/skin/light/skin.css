@@ -1,4 +1,8 @@
 :root {
   --color-bg: #fff;
   --color-text: #333;
+  --color-border: #cccccc;
+  --color-side-bg: #fff;
+  --color-caption-bg: #d8e6f5;
+  --color-caption-text: #000000;
 }

@@ -7,6 +7,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import Home from '@/views/Home.vue'
+import TSViews from '@/views/TSViews'
 
 @Component({
   components: {
@@ -21,6 +22,7 @@ export default class HelloWorld extends Vue {
 
   mounted() {
     this.setAppSize();
+    TSViews.bindKey();
   }
 
   private setAppSize() {

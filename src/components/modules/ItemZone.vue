@@ -60,7 +60,6 @@ export default class ItemZone extends Vue {
 <style lang="stylus" scoped>
 .item-zone {
   height 100%
-  background-color var(--color-side-bg)
 
   .item-table{
 

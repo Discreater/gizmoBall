@@ -8,7 +8,7 @@ import { Collider } from './Collider';
 // export * from "./Triangle";
 export { Collider };
 
-export type MapItemNames = "absorber"|"baffle-alpha"|"baffle-beta"|"ball"|"circle"|"pipe"|"pipe-turned"|"square"|"triangle";
+export type MapItemNames = "absorber"|"baffle-alpha"|"baffle-beta"|"ball"|"border"|"circle"|"pipe"|"pipe-turned"|"square"|"triangle";
 
 export enum Direction {
   Up,
