@@ -125,7 +125,7 @@ export class Controller {
         {
           type: 'question',
           buttons: ['保存', '不保存', '取消'],
-          message: '当前文件为保存，是否保存?',
+          message: '当前文件未保存，是否保存?',
           defaultId: 0,
           cancelId: 2
         },

@@ -21,7 +21,11 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       builderOptions: {
-        productName: "gizmoBall"
+        productName: "gizmoBall",
+        appId: "com.OOAD.gizmo",
+        win: {
+          icon: "public/favicon.ico"
+        }
       }
     }
   }
