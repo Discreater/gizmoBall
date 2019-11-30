@@ -57,11 +57,13 @@ export default class ModeZone extends Vue {
 
   private changeToLayoutMode() {
     store.commit.changeMode('LAYOUT');
+    store.commit.changeState('PAUSE');
     Controller.getInstance().stopPlaying();
   }
 
   private changeToPlayMode() {
     store.commit.changeMode('PLAY');
+    store.commit.changeState('PLAYING');
     Controller.getInstance().startPlaying();
   }
 }

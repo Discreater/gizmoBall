@@ -24,3 +24,5 @@ yarn-error.log*
 /dist_electron
 
 /原始素材
+
+build/
